@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { LETTERS, diatonicIndex, noteName, pitch, toMidi } from './pitch'
 import { PROGRESSIONS } from './progressions'
-import { degreeOf, describeKey, isTheoreticalKey, majorScale, type Tonic } from './scales'
+import {
+  degreeOf,
+  describeKey,
+  isTheoreticalKey,
+  majorScale,
+  naturalMinorScale,
+  type Tonic,
+} from './scales'
 
 const write = (tonic: Tonic, octave = 4): string =>
   majorScale({ ...tonic, octave })
@@ -144,5 +151,37 @@ describe('degreeOf', () => {
     expect(degreeOf(scale, pitch('A', 0, 4))).toBe(5)
     // sol♭ sonne comme fa♯ mais ne fait pas partie de ré majeur.
     expect(degreeOf(scale, pitch('G', -1, 4))).toBeNull()
+  })
+})
+
+describe('naturalMinorScale', () => {
+  const writeMinor = (tonic: Tonic): string =>
+    naturalMinorScale({ ...tonic, octave: 4 })
+      .map((p) => noteName(p))
+      .join(' ')
+
+  it.each([
+    [T('A'), 'la si do ré mi fa sol la'],
+    [T('C'), 'do ré mi♭ fa sol la♭ si♭ do'],
+    [T('E'), 'mi fa♯ sol la si do ré mi'],
+  ])('écrit correctement la gamme mineure de %o', (tonic, expected) => {
+    expect(writeMinor(tonic)).toBe(expected)
+  })
+
+  it('est la gamme majeure démarrée à son 6e degré', () => {
+    // la mineur et do majeur emploient exactement les mêmes notes ; seul le
+    // point de départ change, et c'est lui qui produit la couleur mineure.
+    const cMajor = majorScale(pitch('C', 0, 4)).slice(0, 7).map(noteName).sort()
+    const aMinor = naturalMinorScale(pitch('A', 0, 4)).slice(0, 7).map(noteName).sort()
+    expect(aMinor).toEqual(cMajor)
+  })
+
+  it('diffère du majeur de trois degrés sur la même tonique', () => {
+    const major = majorScale(pitch('C', 0, 4)).slice(0, 7)
+    const minor = naturalMinorScale(pitch('C', 0, 4)).slice(0, 7)
+    const differing = major
+      .map((note, index) => (noteName(note) === noteName(minor[index]!) ? null : index + 1))
+      .filter((degree): degree is number => degree !== null)
+    expect(differing).toEqual([3, 6, 7])
   })
 })

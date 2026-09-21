@@ -27,6 +27,14 @@ import {
 /** Intervalles successifs de la gamme majeure, en demi-tons. */
 export const MAJOR_PATTERN = [2, 2, 1, 2, 2, 2, 1] as const
 
+/**
+ * Gamme mineure naturelle : le même cycle de sept intervalles, démarré au 6e
+ * degré du majeur. C'est ce décalage — et lui seul — qui produit la couleur
+ * dite « mineure ». L'application n'enseigne pas les gammes mineures ; ce
+ * motif sert à faire entendre la différence dans le lexique.
+ */
+export const NATURAL_MINOR_PATTERN = [2, 1, 2, 2, 1, 2, 2] as const
+
 /** Tonique d'une gamme : une note sans octave. */
 export interface Tonic {
   readonly letter: Letter
@@ -46,16 +54,20 @@ export interface ScaleKey {
 }
 
 /**
- * Construit la gamme majeure sur une tonique donnée : 8 notes, tonique
- * répétée à l'octave supérieure.
+ * Construit une gamme de sept degrés sur une tonique, en suivant un motif
+ * d'intervalles : 8 notes, tonique répétée à l'octave supérieure.
+ *
+ * Les deux règles sont appliquées ici, et elles sont indépendantes du motif :
+ * le motif fixe le son de chaque degré, la contrainte « une lettre par degré »
+ * fixe son écriture.
  */
-export function majorScale(tonic: Pitch): Pitch[] {
+export function buildScale(tonic: Pitch, pattern: readonly number[]): Pitch[] {
   const scale: Pitch[] = [tonic]
   const tonicLetterIndex = LETTERS.indexOf(tonic.letter)
   let midi = toMidi(tonic)
 
-  for (let step = 0; step < MAJOR_PATTERN.length; step += 1) {
-    midi += MAJOR_PATTERN[step] as number
+  for (let step = 0; step < pattern.length; step += 1) {
+    midi += pattern[step] as number
 
     // Règle 2 : la lettre suivante, quoi qu'il arrive.
     const letterIndex = tonicLetterIndex + step + 1
@@ -66,7 +78,7 @@ export function majorScale(tonic: Pitch): Pitch[] {
     const alteration = alterationFor(letter, octave, midi)
     if (!isWritableAlteration(alteration)) {
       throw new Error(
-        `La gamme de ${noteName(tonic)} majeur exige une altération non notable ` +
+        `La gamme de ${noteName(tonic)} exige une altération non notable ` +
           `(${alteration > 0 ? '+' : ''}${alteration} demi-tons sur ${letter}).`,
       )
     }
@@ -75,6 +87,16 @@ export function majorScale(tonic: Pitch): Pitch[] {
   }
 
   return scale
+}
+
+/** Gamme majeure : 8 notes, tonique répétée à l'octave supérieure. */
+export function majorScale(tonic: Pitch): Pitch[] {
+  return buildScale(tonic, MAJOR_PATTERN)
+}
+
+/** Gamme mineure naturelle, employée par le lexique pour la comparaison. */
+export function naturalMinorScale(tonic: Pitch): Pitch[] {
+  return buildScale(tonic, NATURAL_MINOR_PATTERN)
 }
 
 /** Décrit une tonalité : nom, nombre et sens des altérations. */

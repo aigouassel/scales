@@ -8,7 +8,7 @@ interrogent ces mêmes fonctions — c’est ce qui rend impossible qu’un exer
 accepte fa♯ là où un autre attend sol♭.
 
 ```bash
-yarn test          # 59 tests, sans navigateur
+yarn test          # 64 tests, sans navigateur
 ```
 
 ---
@@ -61,6 +61,12 @@ mais réutiliserait la lettre sol.
 majorScale(pitch('D', 0, 4)).map(noteName)
 // ['ré', 'mi', 'fa♯', 'sol', 'la', 'si', 'do♯', 'ré']
 ```
+
+`buildScale(tonic, pattern)` applique les deux règles à n’importe quel motif
+d’intervalles ; `majorScale` et `naturalMinorScale` n’en sont que deux
+spécialisations. Le mineur naturel ne sert pas à l’apprentissage — l’application
+n’enseigne que le majeur — mais au lexique, pour faire *entendre* ce que le mot
+désigne.
 
 `describeKey(tonic)` en déduit le nom, le nombre d’altérations et leur sens.
 `isTheoreticalKey(tonic)` signale les tonalités qui exigeraient une double
