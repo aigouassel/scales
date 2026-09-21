@@ -76,6 +76,20 @@ personne n’emploie. On ne les interdit pas, on les écarte de l’apprentissag
 `degreeOf(scale, note)` situe une note dans la gamme **orthographe comprise** :
 en ré majeur, sol♭ n’est pas le 3ᵉ degré, même s’il sonne comme fa♯.
 
+`judgeWrittenNote(scale, index, written)` corrige une note écrite et rend un
+verdict à **trois** issues, non à deux :
+
+| Verdict | Signification |
+| --- | --- |
+| `correct` | la note attendue |
+| `enharmonic` | le bon son, la mauvaise lettre — avec le degré qui occupe déjà cette lettre |
+| `wrong` | une autre hauteur, octave comprise |
+
+La distinction est le cœur de l’exercice d’écriture : une gamme peut être juste
+à l’oreille et fautive à la lecture, et confondre les deux cas effacerait
+précisément ce qu’il y a à comprendre. Une erreur d’octave reste un `wrong` —
+c’est un problème de placement, pas d’orthographe.
+
 ## `progressions.ts` — les deux ordres d’apprentissage
 
 `PROGRESSIONS.degrees` suit do, ré, mi, fa… — intuitif, mais la difficulté
