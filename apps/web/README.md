@@ -1,0 +1,51 @@
+# `@scales/web`
+
+L’application. Elle assemble les trois sections, choisit la tonalité une fois
+pour toutes les trois, et garde la progression dans le navigateur.
+
+```bash
+yarn dev      # depuis la racine du dépôt
+```
+
+---
+
+## Structure
+
+```
+src/
+  App.tsx                    coquille : progression, tonalité, onglets
+  sections/
+    ExercisesSection.tsx     écrire la gamme sur la portée
+    PlaySection.tsx          jouer librement au clavier
+    EarSection.tsx           reconnaître à l'oreille + calibrage
+  storage.ts                 accès défensif au localStorage
+  usePersistentState.ts      useState sauvegardé sous une clé stable
+  app.css                    thème, mise en page, clair et sombre
+```
+
+La tonalité vit dans `App` : passer d’une section à l’autre ne la change pas.
+C’est ce qui fait tenir la promesse « une gamme, trois portes » plutôt que
+trois exercices indépendants.
+
+## Ce qui est persisté
+
+Sous le préfixe `scales.v1.` : la progression choisie, la tonalité en cours, le
+mode d’oreille, le verdict du calibrage et la liste des gammes écrites sans
+faute.
+
+Toutes les lectures sont défensives — le stockage peut être désactivé, plein,
+ou contenir des données d’une version antérieure. Une valeur illisible retombe
+sur la valeur par défaut au lieu de casser l’application.
+
+## Points d’attention
+
+**Changer de tonalité remet l’exercice à zéro.** La réponse attendue n’est plus
+la même ; garder les notes posées donnerait une correction absurde.
+
+**Le clavier reste jouable hors exercice.** Dans la section Oreille, appuyer
+sur une touche avant d’avoir commencé joue la note sans être compté. Griser le
+clavier donnait l’impression qu’il était cassé.
+
+**Un seul `AudioContext`** pour toute l’application, exposé par `@scales/audio`
+comme un singleton. Chaque section le déverrouille avant de jouer, ce qui rend
+l’ordre des interactions indifférent.
