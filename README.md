@@ -161,13 +161,17 @@ relative, précisément ce que le test doit exclure. Il ne donne aucun retour
 avant la fin, pour la même raison : corriger note par note apprendrait à
 répondre.
 
-### Ce que la palette d’altération fait — et ne fait pas
+### Poser d’abord, altérer ensuite
 
-La palette ♭ / ♮ / ♯ est une **plume** : elle règle ce qui sera écrit au
-prochain clic, et ne touche à aucune note déjà posée. La faire agir aussi sur
-la note sélectionnée paraissait pratique, mais produisait l’inverse : comme
-poser une note la sélectionne, choisir un bémol pour la note *suivante*
-altérait silencieusement la *précédente*. Pour corriger, on réécrit.
+Un clic pose toujours une note **naturelle** ; <kbd>↑</kbd> et <kbd>↓</kbd>
+l’altèrent ensuite d’un demi-ton.
+
+Une palette ♭ / ♮ / ♯ jouait ce rôle au départ. Elle imposait de décider avant
+d’écrire, et surtout, quand elle agissait aussi sur la note sélectionnée, elle
+produisait l’inverse de ce qu’on attendait : comme poser une note la
+sélectionne, régler le bémol de la note *suivante* altérait silencieusement la
+*précédente*. Poser puis ajuster supprime la question de l’ordre — et les trois
+boutons avec elle.
 
 ---
 
