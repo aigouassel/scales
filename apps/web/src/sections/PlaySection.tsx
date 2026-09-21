@@ -99,7 +99,7 @@ export function PlaySection({ scaleKey }: PlaySectionProps) {
             ) : (
               <span className="readout__in">
                 {degree}
-                <sup>{degree === 1 ? 're' : 'e'}</sup> degré de {scaleKey.name} —{' '}
+                <sup>{degree === 1 ? 'er' : 'e'}</sup> degré de {scaleKey.name} —{' '}
                 {DEGREE_NAMES[degree - 1]}
               </span>
             )}

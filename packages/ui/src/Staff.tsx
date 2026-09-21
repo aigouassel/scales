@@ -19,7 +19,12 @@ import {
   type Pitch,
 } from '@scales/music-theory'
 
-export type SlotStatus = 'correct' | 'wrong' | null
+/**
+ * `enharmonic` : la note sonne juste mais s'écrit avec la mauvaise lettre.
+ * Elle mérite sa propre couleur — la marquer comme fausse laisserait croire
+ * à une erreur d'oreille, alors que l'oreille avait raison.
+ */
+export type SlotStatus = 'correct' | 'enharmonic' | 'wrong' | null
 
 export interface StaffProps {
   /** Une entrée par emplacement ; null = emplacement vide. */
@@ -67,6 +72,7 @@ function scaleFor(height: number): number {
 
 const COLORS = {
   correct: '#1a7f5a',
+  enharmonic: '#c08a2e',
   wrong: '#c0392b',
   selected: '#2f6fd0',
 } as const
@@ -176,13 +182,11 @@ export function Staff({
 
       const status = statuses?.[index] ?? null
       const color =
-        status === 'correct'
-          ? COLORS.correct
-          : status === 'wrong'
-            ? COLORS.wrong
-            : index === selectedIndex
-              ? COLORS.selected
-              : ink
+        status !== null
+          ? COLORS[status]
+          : index === selectedIndex
+            ? COLORS.selected
+            : ink
       staveNote.setStyle({ fillStyle: color, strokeStyle: color })
       // Les lignes supplémentaires ont leur propre style dans VexFlow et ne
       // suivent pas celui de la note : sans cela, le do central reste gravé

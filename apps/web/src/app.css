@@ -12,6 +12,8 @@
   --success-soft: #e6f4ee;
   --error: #c0392b;
   --error-soft: #fbecea;
+  --warning: #9a6b14;
+  --warning-soft: #fbf2e0;
   --radius: 10px;
 
   color-scheme: light;
@@ -32,6 +34,8 @@
     --success-soft: #16302a;
     --error: #ef7d70;
     --error-soft: #34201e;
+    --warning: #e0ab5a;
+    --warning-soft: #33280f;
 
     color-scheme: dark;
   }
@@ -491,6 +495,26 @@ body {
 
 .result--error {
   background: var(--error-soft);
+}
+
+/* Le cas « juste au son, faux à l'écriture » a son propre ton : ce n'est ni
+   une réussite ni une fausse note, et le confondre avec l'une des deux
+   effacerait précisément ce qu'il y a à comprendre. */
+.result--enharmonic {
+  background: var(--warning-soft);
+}
+
+.result__enharmonic {
+  color: var(--warning);
+}
+
+.result__arrow {
+  color: var(--text-soft);
+}
+
+.result__why {
+  color: var(--text-soft);
+  font-size: 0.95em;
 }
 
 /* Les écarts tiennent sur une ligne : en pleine fenêtre, une liste verticale

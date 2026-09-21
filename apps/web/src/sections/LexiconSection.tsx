@@ -305,7 +305,7 @@ function buildChapters(scaleKey: ScaleKey, goTo: (id: string) => void): Chapter[
                   <li key={degreeName}>
                     <span className="lexicon__term">
                       {index + 1}
-                      <sup>{index === 0 ? 're' : 'e'}</sup> — {degreeName}
+                      <sup>{index === 0 ? 'er' : 'e'}</sup> — {degreeName}
                     </span>
                     <span className="lexicon__gap">{DEGREE_NOTES[index] ?? ''}</span>
                     <span className="lexicon__example">

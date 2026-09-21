@@ -167,3 +167,58 @@ export function scaleRange(scale: readonly Pitch[]): { low: number; high: number
   const indexes = scale.map(diatonicIndex)
   return { low: Math.min(...indexes), high: Math.max(...indexes) }
 }
+
+/**
+ * Verdict porté sur une note écrite, comparée à celle qu'attend la gamme.
+ *
+ * Le cas intéressant est `enharmonic` : la note sonne juste, mais s'écrit
+ * avec la mauvaise lettre. C'est une faute qui ne s'entend pas — elle ne se
+ * voit qu'à la lecture — et la confondre avec une fausse note priverait
+ * l'apprenant de la seule occasion de comprendre pourquoi l'orthographe
+ * n'est pas libre.
+ */
+export type WrittenNoteVerdict =
+  | { readonly kind: 'correct' }
+  | {
+      readonly kind: 'enharmonic'
+      readonly expected: Pitch
+      readonly written: Pitch
+      /**
+       * Degré de la gamme qui emploie déjà la lettre choisie (1 à 7), ou null
+       * si cette lettre n'appartient pas à la gamme. C'est l'explication de la
+       * faute : la lettre est prise ailleurs.
+       */
+      readonly clashingDegree: number | null
+    }
+  | { readonly kind: 'wrong'; readonly expected: Pitch; readonly written: Pitch }
+
+/**
+ * Juge une note écrite à une position donnée de la gamme.
+ *
+ * La comparaison se fait sur le son exact, octave comprise : une note à la
+ * bonne classe de hauteur mais à la mauvaise octave est une erreur de
+ * placement, pas une question d'orthographe.
+ */
+export function judgeWrittenNote(
+  scale: readonly Pitch[],
+  index: number,
+  written: Pitch,
+): WrittenNoteVerdict {
+  const expected = scale[index]
+  if (expected === undefined) return { kind: 'wrong', expected: written, written }
+
+  if (toMidi(written) !== toMidi(expected)) {
+    return { kind: 'wrong', expected, written }
+  }
+
+  if (written.letter === expected.letter) return { kind: 'correct' }
+
+  // Même son, autre lettre : reste à dire pourquoi cette lettre est indisponible.
+  const clashing = scale.slice(0, 7).findIndex((note) => note.letter === written.letter)
+  return {
+    kind: 'enharmonic',
+    expected,
+    written,
+    clashingDegree: clashing === -1 ? null : clashing + 1,
+  }
+}

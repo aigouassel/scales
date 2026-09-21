@@ -30,6 +30,14 @@ La correction arrive **à la validation, pas note par note** : il faut s’engag
 sur les huit notes avant de savoir. Un retour immédiat permettrait de réussir
 par tâtonnement, sans jamais raisonner.
 
+Elle distingue trois cas, et non deux. Une note peut être juste, fausse, ou
+**enharmonique** — le bon son avec la mauvaise lettre. Écrire sol♭ au 3ᵉ degré
+de ré majeur sonne parfaitement juste : c’est une faute de grammaire, pas
+d’oreille. L’application la signale dans sa propre couleur et l’explique : « la
+lettre sol est celle du 4ᵉ degré ». Les traiter comme de simples fausses notes
+priverait de la seule occasion de comprendre pourquoi l’orthographe n’est pas
+libre.
+
 ### Jouer — le clavier sous les doigts
 
 Un piano d’une octave joué à la souris ou au clavier de l’ordinateur. Les

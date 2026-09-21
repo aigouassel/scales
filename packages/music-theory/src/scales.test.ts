@@ -5,6 +5,7 @@ import {
   degreeOf,
   describeKey,
   isTheoreticalKey,
+  judgeWrittenNote,
   majorScale,
   naturalMinorScale,
   type Tonic,
@@ -183,5 +184,60 @@ describe('naturalMinorScale', () => {
       .map((note, index) => (noteName(note) === noteName(minor[index]!) ? null : index + 1))
       .filter((degree): degree is number => degree !== null)
     expect(differing).toEqual([3, 6, 7])
+  })
+})
+
+describe('judgeWrittenNote', () => {
+  // ré majeur : ré mi fa♯ sol la si do♯ ré
+  const dMajor = majorScale(pitch('D', 0, 4))
+
+  it('accepte la note attendue', () => {
+    expect(judgeWrittenNote(dMajor, 2, pitch('F', 1, 4))).toEqual({ kind: 'correct' })
+  })
+
+  it('distingue la faute d’orthographe de la fausse note', () => {
+    // sol♭ sonne comme fa♯, mais la lettre sol est celle du 4e degré.
+    const verdict = judgeWrittenNote(dMajor, 2, pitch('G', -1, 4))
+    expect(verdict.kind).toBe('enharmonic')
+    if (verdict.kind !== 'enharmonic') throw new Error('verdict inattendu')
+    expect(noteName(verdict.expected)).toBe('fa♯')
+    expect(verdict.clashingDegree).toBe(4)
+  })
+
+  it('signale une lettre étrangère à la gamme', () => {
+    // mi majeur : le 7e degré est ré♯ ; mi♭ sonne pareil et la lettre mi est
+    // celle de la tonique.
+    const eMajor = majorScale(pitch('E', 0, 4))
+    const verdict = judgeWrittenNote(eMajor, 6, pitch('E', -1, 5))
+    expect(verdict.kind).toBe('enharmonic')
+    if (verdict.kind !== 'enharmonic') throw new Error('verdict inattendu')
+    expect(verdict.clashingDegree).toBe(1)
+  })
+
+  it('traite une mauvaise hauteur comme une fausse note', () => {
+    expect(judgeWrittenNote(dMajor, 2, pitch('F', 0, 4)).kind).toBe('wrong')
+    expect(judgeWrittenNote(dMajor, 2, pitch('G', 0, 4)).kind).toBe('wrong')
+  })
+
+  it('traite une erreur d’octave comme une fausse note, pas d’orthographe', () => {
+    // Même classe de hauteur, mauvaise octave : c'est un problème de placement.
+    expect(judgeWrittenNote(dMajor, 2, pitch('F', 1, 5)).kind).toBe('wrong')
+  })
+
+  it('juge correctement une gamme entière écrite en enharmonies', () => {
+    const kinds = dMajor.map((_, index) => {
+      const written = index === 2 ? pitch('G', -1, 4) : index === 6 ? pitch('D', -1, 5) : dMajor[index]!
+      return judgeWrittenNote(dMajor, index, written).kind
+    })
+    expect(kinds).toEqual([
+      'correct',
+      'correct',
+      'enharmonic',
+      'correct',
+      'correct',
+      'correct',
+      'enharmonic',
+      'correct',
+    ])
   })
 })

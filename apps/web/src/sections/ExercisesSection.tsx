@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   DEGREE_NAMES,
   diatonicIndex,
-  isSamePitch,
+  judgeWrittenNote,
   majorScale,
   noteName,
   pitch,
@@ -10,6 +10,7 @@ import {
   type Letter,
   type Pitch,
   type ScaleKey,
+  type WrittenNoteVerdict,
 } from '@scales/music-theory'
 import { notePlayer } from '@scales/audio'
 import { Staff, type SlotStatus } from '@scales/ui'
@@ -26,7 +27,14 @@ const ALTERATION_CHOICES: { value: Alteration; symbol: string; label: string }[]
   { value: 1, symbol: '♯', label: 'dièse' },
 ]
 
-const ORDINAL = (index: number) => (index === 0 ? '1re' : `${index + 1}e`)
+/** « degré » est masculin : le premier s'abrège 1er, pas 1re. */
+const ORDINAL = (index: number) => (index === 0 ? '1er' : `${index + 1}e`)
+
+/** Une note à revoir : mal orthographiée, fausse, ou absente. */
+interface Issue {
+  index: number
+  verdict: Exclude<WrittenNoteVerdict, { kind: 'correct' }> | null
+}
 
 export interface ExercisesSectionProps {
   scaleKey: ScaleKey
@@ -54,6 +62,7 @@ export function ExercisesSection({
     setSlots(EMPTY)
     setSelected(0)
     setStatuses(null)
+    setVerdicts(null)
     setHintShown(false)
     setAlteration(0)
   }, [scaleKey])
@@ -61,6 +70,7 @@ export function ExercisesSection({
   const place = useCallback(
     (index: number, letter: Letter, octave: number) => {
       setStatuses(null)
+      setVerdicts(null)
       const note = pitch(letter, alteration, octave)
       setSlots((previous) => {
         const next = [...previous]
@@ -89,6 +99,7 @@ export function ExercisesSection({
   const clearSelected = useCallback(() => {
     if (selected === null) return
     setStatuses(null)
+    setVerdicts(null)
     setSlots((previous) => {
       const next = [...previous]
       next[selected] = null
@@ -116,15 +127,16 @@ export function ExercisesSection({
 
   const isComplete = slots.every((note) => note !== null)
 
-  const check = () => {
-    const result: SlotStatus[] = slots.map((note, index) => {
-      const target = expected[index]
-      if (note === null || target === undefined) return 'wrong'
-      return isSamePitch(note, target) ? 'correct' : 'wrong'
-    })
-    setStatuses(result)
+  const [verdicts, setVerdicts] = useState<(WrittenNoteVerdict | null)[] | null>(null)
 
-    if (result.every((status) => status === 'correct')) {
+  const check = () => {
+    const judged = slots.map((note, index) =>
+      note === null ? null : judgeWrittenNote(expected, index, note),
+    )
+    setVerdicts(judged)
+    setStatuses(judged.map((verdict) => (verdict === null ? 'wrong' : verdict.kind)))
+
+    if (judged.every((verdict) => verdict?.kind === 'correct')) {
       onSolved(scaleKey.id)
       void notePlayer.playSequence(expected, { interval: 0.32 })
     }
@@ -136,17 +148,26 @@ export function ExercisesSection({
     void notePlayer.playSequence(playable, { interval: 0.42 })
   }
 
-  const solved = statuses !== null && statuses.every((status) => status === 'correct')
-  const showCorrection = statuses !== null && !solved
+  const solved = verdicts !== null && verdicts.every((verdict) => verdict?.kind === 'correct')
+
+  /**
+   * Toutes les notes sonnent juste, mais au moins une est mal orthographiée.
+   * C'est le cas que l'oreille ne peut pas rattraper — il mérite son propre
+   * message, et son propre ton : ce n'est pas une erreur de solfège, c'est une
+   * erreur de grammaire.
+   */
+  const spellingOnly =
+    verdicts !== null &&
+    !solved &&
+    verdicts.every((verdict) => verdict !== null && verdict.kind !== 'wrong')
+
+  const showCorrection = verdicts !== null && !solved
 
   /** Les écarts, en une ligne compacte plutôt qu'en liste : la place est comptée. */
-  const differences = expected
-    .map((target, index) => {
-      const written = slots[index]
-      if (written !== undefined && written !== null && isSamePitch(written, target)) return null
-      return { index, target, written: written ?? null }
-    })
-    .filter((entry): entry is { index: number; target: Pitch; written: Pitch | null } => entry !== null)
+  const issues: Issue[] = (verdicts ?? []).flatMap((verdict, index) => {
+    if (verdict !== null && verdict.kind === 'correct') return []
+    return [{ index, verdict }]
+  })
 
   return (
     <section className="section">
@@ -209,8 +230,12 @@ export function ExercisesSection({
         ) : null}
       </div>
 
-      {statuses !== null ? (
-        <p className={`result ${solved ? 'result--success' : 'result--error'}`}>
+      {verdicts !== null ? (
+        <p
+          className={`result ${
+            solved ? 'result--success' : spellingOnly ? 'result--enharmonic' : 'result--error'
+          }`}
+        >
           {solved ? (
             <>
               <strong>Juste.</strong> {expected.map((note) => noteName(note)).join(' ')}
@@ -218,21 +243,52 @@ export function ExercisesSection({
           ) : (
             <>
               <strong>
-                {differences.length} note{differences.length > 1 ? 's' : ''} à revoir.
+                {spellingOnly
+                  ? 'Juste à l’oreille, fautif à l’écriture.'
+                  : `${issues.length} note${issues.length > 1 ? 's' : ''} à revoir.`}
               </strong>{' '}
-              {differences.map((entry) => (
-                <span key={entry.index} className="result__item">
-                  <span className="result__degree" title={DEGREE_NAMES[entry.index] ?? 'octave'}>
-                    {ORDINAL(entry.index)}
+              {issues.map(({ index, verdict }) => (
+                <span key={index} className="result__item">
+                  <span className="result__degree" title={DEGREE_NAMES[index] ?? 'octave'}>
+                    {ORDINAL(index)}
                   </span>
-                  <strong>{noteName(entry.target)}</strong>
-                  <span className="result__written">
-                    {entry.written === null ? 'non posée' : `vous : ${noteName(entry.written)}`}
-                  </span>
+                  {verdict === null ? (
+                    <span className="result__written">non posée</span>
+                  ) : verdict.kind === 'enharmonic' ? (
+                    <>
+                      <span className="result__enharmonic">{noteName(verdict.written)}</span>
+                      <span className="result__arrow" aria-hidden="true">
+                        →
+                      </span>
+                      <strong>{noteName(verdict.expected)}</strong>
+                      <span className="result__why">
+                        {verdict.clashingDegree === null
+                          ? '(lettre étrangère à la gamme)'
+                          : `(la lettre ${noteName({ ...verdict.written, alteration: 0 })} est celle du ${
+                              verdict.clashingDegree
+                            }${verdict.clashingDegree === 1 ? 'er' : 'e'} degré)`}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <strong>{noteName(verdict.expected)}</strong>
+                      <span className="result__written">
+                        vous : {noteName(verdict.written)}
+                      </span>
+                    </>
+                  )}
                 </span>
               ))}
             </>
           )}
+        </p>
+      ) : null}
+
+      {spellingOnly ? (
+        <p className="hint">
+          Chaque degré porte sa propre lettre, et chaque lettre ne sert qu’une fois. Une note
+          enharmonique sort la même touche du piano mais réutilise une lettre déjà prise :
+          l’oreille ne peut pas l’entendre, seule la lecture la révèle.
         </p>
       ) : null}
 

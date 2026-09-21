@@ -277,7 +277,7 @@ export function EarSection({ scaleKey, mode, onModeChange, verdict, onVerdict }:
                       <>
                         {' '}
                         — {targetDegree}
-                        <sup>e</sup> degré de {scaleKey.name}.
+                        <sup>{targetDegree === 1 ? 'er' : 'e'}</sup> degré de {scaleKey.name}.
                       </>
                     ) : (
                       '.'
