@@ -8,7 +8,7 @@ interrogent ces mêmes fonctions — c’est ce qui rend impossible qu’un exer
 accepte fa♯ là où un autre attend sol♭.
 
 ```bash
-yarn test          # 64 tests, sans navigateur
+yarn test          # 86 tests, sans navigateur
 ```
 
 ---
@@ -100,23 +100,55 @@ Les deux couvrent les 12 classes de hauteur, mais pas toujours avec la même
 orthographe : sol♭ se lit naturellement entre fa et sol dans l’ordre des
 degrés, alors que le cycle des quintes atteint fa♯ par le côté des dièses.
 
-## `ear.ts` — le tirage des exercices d’oreille
+## `ear.ts` — tirage et diagnostic des exercices d’oreille
 
-`drawTrainingQuestion(mode, tonic, octave, rng?)` rend une note cible et,
-en mode relatif, la tonique à jouer comme référence. Le premier degré est exclu
-du tirage relatif : il vient d’être joué, le reconnaître ne demanderait aucun
-effort.
+### Tirer
 
-`buildCalibration(rng?)` construit le test de dix notes. Il impose au moins une
-quarte entre deux notes consécutives et les disperse sur trois octaves — sans
-cet écart, on répondrait en comparant à la note précédente encore en mémoire,
-c’est-à-dire à l’oreille relative, précisément ce que le test doit exclure.
+`drawTrainingQuestion(mode, tonic, octave, rng?, previous?)` rend une note
+cible et, en mode relatif, la tonique à jouer comme référence. Le premier degré
+est exclu du tirage relatif : il vient d’être joué, le reconnaître ne
+demanderait aucun effort.
 
-`calibrationVerdict(score)` interprète le résultat : ≥ 8 ne s’obtient pas par
-chance (le hasard donne environ 1 sur 12), ≤ 3 y est compatible, entre les deux
-on ne conclut pas.
+`previous` — la cible de la question précédente — impose en mode absolu un
+écart d’au moins une quarte, et l’octave est tirée sur trois registres. Sans
+ces deux précautions, deux demi-tons voisins dans la même octave pouvaient se
+succéder : l’exercice se résolvait alors à l’intervalle.
 
-Le paramètre `rng` rend tout le module déterministe sous test.
+Le module ne peut pas tout fermer. Garder une note en mémoire comme diapason,
+ou se servir de celle qu’on vient de jouer pour répondre, relève de l’audio
+(`playMask`) et de l’interface — pas du tirage.
+
+### Compter
+
+`chanceProbability(score, total, alternatives?)` rend la queue binomiale : la
+probabilité d’obtenir ce score **ou mieux** par pur hasard.
+
+L’intuition se trompe dans les deux sens. Avec douze alternatives, 3 sur 10 ont
+une probabilité de 0,044 d’être dues au hasard — déjà significatif — tandis que
+2 sur 2 font 100 % sans rien prouver. Le calcul se fait en logarithmes : sur 84
+essais, les coefficients binomiaux dépassent ce qu’un `double` représente, pas
+leurs logarithmes.
+
+### Diagnostiquer
+
+Le score dit « au-dessus du hasard ». Il ne dit pas **comment** la réponse a
+été trouvée. `diagnoseAttempts(attempts)` s’en charge :
+
+- `classifyError` range chaque erreur en `semitone` (±1 demi-ton : la bonne
+  zone, ratée d’un cran), `mirrored` (même distance à la note précédente, sens
+  opposé — la confusion quarte/quinte, impossible à qui nomme directement) ou
+  `scattered` ;
+- l’**effet d’ancrage** compare la réussite sur les notes proches de la
+  précédente à celle sur les lointaines : une stratégie par repère creuse cet
+  écart, une oreille absolue l’ignore ;
+- la **dispersion des latences** distingue l’accès direct du calcul — c’est la
+  variance qui compte, pas la moyenne.
+
+`CHANCE_SHAPE_SHARE` garde la part attendue de chaque forme si l’on répond au
+hasard (2/11, 1/11, 8/11) : une occurrence isolée ne prouve rien, seule une
+part qui dépasse nettement sa base est lue.
+
+Le paramètre `rng` rend tout le tirage déterministe sous test.
 
 ---
 
