@@ -7,3 +7,5 @@ coverage/
 # Yarn (Berry) — géré par corepack, aucune release versionnée
 .yarn/*
 .pnp.*
+dist/
+*.tsbuildinfo
