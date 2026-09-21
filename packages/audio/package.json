@@ -1,0 +1,16 @@
+{
+  "name": "@scales/audio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --build"
+  },
+  "dependencies": {
+    "@scales/music-theory": "workspace:^",
+    "smplr": "^0.16.2"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/music-theory" },
+    { "path": "./packages/audio" },
+    { "path": "./packages/ui" },
+    { "path": "./apps/web" }
+  ]
+}

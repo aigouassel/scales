@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "noEmit": false
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../../packages/music-theory" },
+    { "path": "../../packages/audio" },
+    { "path": "../../packages/ui" }
+  ]
+}
