@@ -222,6 +222,17 @@ fait 5 px, soit une cible trop petite pour viser une hauteur à la souris.
 
 ---
 
+## Documentation
+
+- [`docs/v1.md`](docs/v1.md) — ce que permet cette première version, les
+  décisions qui la définissent, ses limites et les pistes qui suivraient.
+- [`packages/music-theory`](packages/music-theory/README.md) — le noyau musical.
+- [`packages/audio`](packages/audio/README.md) — la lecture des notes.
+- [`packages/ui`](packages/ui/README.md) — le clavier et la portée.
+- [`apps/web`](apps/web/README.md) — l’application.
+
+---
+
 ## Ce qui n’est pas fait
 
 Par choix de périmètre, pas par oubli :
