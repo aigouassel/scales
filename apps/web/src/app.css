@@ -533,3 +533,159 @@ kbd {
     min-width: 0;
   }
 }
+
+/* --- Lexique --- */
+
+.lexicon h3 {
+  font-size: 1.1rem;
+  margin-top: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* La largeur se limite sur le texte, pas sur la carte : rétrécir la section
+   entière la ferait paraître plus étroite que les autres onglets. */
+.lexicon > p {
+  margin: 0;
+  max-width: 72ch;
+  color: var(--text-soft);
+}
+
+.term {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 18px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.term:last-of-type {
+  border-bottom: none;
+}
+
+.term__name {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.term__body {
+  max-width: 68ch;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+
+.term__body p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.term__body strong,
+.term__body em {
+  color: var(--text);
+}
+
+.term__body em {
+  font-style: italic;
+}
+
+/* Bouton d'écoute : discret, mais reconnaissable d'un terme à l'autre. */
+.listen {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  margin: 2px 2px 2px 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.listen:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.lexicon__table {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.88rem;
+}
+
+.lexicon__table li {
+  display: grid;
+  grid-template-columns: 150px 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.lexicon__table li:last-child {
+  border-bottom: none;
+}
+
+.lexicon__term {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.lexicon__gap {
+  color: var(--text-soft);
+}
+
+.lexicon__example {
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.lexicon__caption {
+  font-size: 0.8rem;
+  color: var(--text-soft);
+}
+
+.lexicon__compare {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.lexicon__compare--stacked {
+  flex-direction: column;
+  gap: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 680px) {
+  .term {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .lexicon__table li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .lexicon__example {
+    color: var(--text);
+  }
+}

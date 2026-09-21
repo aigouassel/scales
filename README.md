@@ -36,6 +36,19 @@ Un piano d’une octave joué à la souris ou au clavier de l’ordinateur. Les
 touches de la gamme en cours sont surlignées, et chaque note jouée affiche son
 degré dans la tonalité.
 
+### Lexique — les mots du solfège
+
+Un petit cours : hauteur, octave, ton et demi-ton, intervalle, quinte juste,
+enharmonie, gamme, tonique, degré, tonalité, majeur et mineur, altérations,
+armure, oreille absolue et relative.
+
+Chaque terme qui peut s’entendre a un bouton d’écoute — un intervalle se
+comprend mieux à l’oreille qu’à la lecture. La page se termine sur ce que les
+deux progressions apportent respectivement.
+
+Les exemples suivent la tonalité sélectionnée : les degrés affichés sont ceux
+de la gamme en cours d’étude.
+
 ### Oreille — reconnaître les notes
 
 Une note est jouée, on la retrouve sur le clavier. Deux modes, un seul moteur :
@@ -153,7 +166,7 @@ altérait silencieusement la *précédente*. Pour corriger, on réécrit.
 ```
 packages/
   music-theory/   TypeScript pur, zéro dépendance — hauteurs, gammes,
-                  progressions, tirage des exercices d'oreille. 59 tests.
+                  progressions, tirage des exercices d'oreille. 64 tests.
   audio/          Web Audio : échantillons de piano, synthétiseur de repli.
   ui/             Composants partagés : le clavier, la portée cliquable.
 apps/

@@ -18,6 +18,7 @@ src/
     ExercisesSection.tsx     écrire la gamme sur la portée
     PlaySection.tsx          jouer librement au clavier
     EarSection.tsx           reconnaître à l'oreille + calibrage
+    LexiconSection.tsx       le lexique, avec écoute des intervalles
   storage.ts                 accès défensif au localStorage
   usePersistentState.ts      useState sauvegardé sous une clé stable
   app.css                    thème, mise en page, clair et sombre

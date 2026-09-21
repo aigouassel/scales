@@ -13,14 +13,16 @@ import './app.css'
 import { ExercisesSection } from './sections/ExercisesSection'
 import { PlaySection } from './sections/PlaySection'
 import { EarSection } from './sections/EarSection'
+import { LexiconSection } from './sections/LexiconSection'
 import { usePersistentState } from './usePersistentState'
 
-type Tab = 'exercises' | 'play' | 'ear'
+type Tab = 'exercises' | 'play' | 'ear' | 'lexicon'
 
 const TABS: { id: Tab; label: string; hint: string }[] = [
   { id: 'exercises', label: 'Exercices', hint: 'Écrire la gamme sur la portée' },
   { id: 'play', label: 'Jouer', hint: 'Le clavier sous les doigts' },
   { id: 'ear', label: 'Oreille', hint: 'Reconnaître les notes' },
+  { id: 'lexicon', label: 'Lexique', hint: 'Les mots du solfège' },
 ]
 
 export function App() {
@@ -138,6 +140,7 @@ export function App() {
             onVerdict={setVerdict}
           />
         ) : null}
+        {tab === 'lexicon' ? <LexiconSection scaleKey={scaleKey} /> : null}
       </main>
 
       <footer className="app__footer">
