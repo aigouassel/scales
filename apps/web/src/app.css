@@ -844,6 +844,84 @@ body {
   white-space: nowrap;
 }
 
+/* La règle énoncée : sortie du flux pour qu'on la retrouve d'un coup d'œil. */
+.lexicon__rule {
+  padding: 10px 14px;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.lexicon__reasons {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--text-soft);
+}
+
+.lexicon__reasons strong,
+.lexicon__reasons em {
+  color: var(--text);
+}
+
+/* Deux portées côte à côte : la comparaison ne vaut que si l'œil les embrasse
+   d'un seul regard. */
+.lexicon__staves {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+  margin: 4px 0;
+}
+
+.lexicon__staff {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* La portée s'adapte à la boîte qu'on lui donne : sans hauteur explicite,
+     hors contexte flex, elle s'effondrerait à zéro. */
+  height: 170px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Hauteur fixée : sans cela une légende sur deux lignes rognerait sa portée,
+   et les deux figures ne seraient plus à la même échelle — donc plus
+   comparables, ce qui est tout l'objet de la juxtaposition. */
+.lexicon__staff figcaption {
+  flex: none;
+  min-height: 1.4em;
+  font-size: 0.74rem;
+  color: var(--success);
+}
+
+.lexicon__staff-caption--ko {
+  color: var(--error) !important;
+}
+
+.lexicon__example--ok {
+  color: var(--success);
+}
+
+.lexicon__example--ko {
+  color: var(--error);
+}
+
+/* Renvoi interne : un lien, pas un bouton — il conduit ailleurs dans le texte. */
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
 .lexicon__caption {
   font-size: 0.8rem;
   color: var(--text-soft);

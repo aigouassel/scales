@@ -43,7 +43,9 @@ enharmonie, gamme, tonique, degré, tonalité, majeur et mineur, altérations,
 armure, oreille absolue et relative.
 
 Chaque terme qui peut s’entendre a un bouton d’écoute — un intervalle se
-comprend mieux à l’oreille qu’à la lecture. La page se termine sur ce que les
+comprend mieux à l’oreille qu’à la lecture. Un développement sur l’**enharmonie**
+montre, deux portées côte à côte, pourquoi écrire mi♭ au 7ᵉ degré de mi majeur
+est une faute qui ne s’entend pas mais se lit. La page se termine sur ce que les
 deux progressions apportent respectivement.
 
 Les exemples suivent la tonalité sélectionnée : les degrés affichés sont ceux

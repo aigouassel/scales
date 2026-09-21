@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   DEGREE_NAMES,
+  diatonicIndex,
   majorScale,
   naturalMinorScale,
   noteName,
@@ -9,6 +10,7 @@ import {
   type ScaleKey,
 } from '@scales/music-theory'
 import { notePlayer } from '@scales/audio'
+import { Staff } from '@scales/ui'
 
 export interface LexiconSectionProps {
   scaleKey: ScaleKey
@@ -52,12 +54,25 @@ function Listen({
 const C4 = pitch('C', 0, 4)
 const C5 = pitch('C', 0, 5)
 const D4 = pitch('D', 0, 4)
-const E4 = pitch('E', 0, 4)
 const EFLAT4 = pitch('E', -1, 4)
 const F4 = pitch('F', 0, 4)
 const G4 = pitch('G', 0, 4)
 const CSHARP4 = pitch('C', 1, 4)
 const DFLAT4 = pitch('D', -1, 4)
+
+const E4 = pitch('E', 0, 4)
+const DSHARP5 = pitch('D', 1, 5)
+const EFLAT5 = pitch('E', -1, 5)
+const E5 = pitch('E', 0, 5)
+const FSHARP4 = pitch('F', 1, 4)
+
+/** Étendue de la portée d'illustration : la même que celle des exercices. */
+const STAFF_LOW = diatonicIndex({ letter: 'C', octave: 4 })
+const STAFF_HIGH = diatonicIndex({ letter: 'C', octave: 6 })
+
+/** mi majeur, correctement orthographiée, puis avec mi♭ au 7e degré. */
+const E_MAJOR = majorScale(E4)
+const E_MAJOR_MISSPELLED = E_MAJOR.map((note, index) => (index === 6 ? EFLAT5 : note))
 
 const INTERVAL_NAMES = [
   ['seconde', '1 lettre d’écart', 'do → ré'],
@@ -80,7 +95,7 @@ const DEGREE_NOTES: Record<number, string> = {
  * c'est ce qui permet au sommaire d'être dérivé du texte plutôt que tenu à
  * jour en parallèle — deux listes qui divergent tôt ou tard.
  */
-function buildChapters(scaleKey: ScaleKey): Chapter[] {
+function buildChapters(scaleKey: ScaleKey, goTo: (id: string) => void): Chapter[] {
   const scale = majorScale({ ...scaleKey.tonic, octave: 4 })
   const cMajor = majorScale(C4)
   const cMinor = naturalMinorScale(C4)
@@ -220,12 +235,15 @@ function buildChapters(scaleKey: ScaleKey): Chapter[] {
                 différemment : do♯ et ré♭, fa♯ et sol♭. Au piano, c’est la même touche.
               </p>
               <p>
-                L’écriture n’est pourtant pas arbitraire : elle dépend de la gamme. En ré
-                majeur, le 3<sup>e</sup> degré doit porter la lettre fa — donc fa♯, jamais sol♭,
-                qui réutiliserait une lettre déjà prise.
+                <Listen notes={[CSHARP4, DFLAT4]} label="do♯ puis ré♭ — même son" />
               </p>
               <p>
-                <Listen notes={[CSHARP4, DFLAT4]} label="do♯ puis ré♭ — même son" />
+                Choisir entre les deux n’a pourtant rien d’arbitraire, et c’est l’une des idées
+                les plus fécondes du solfège —{' '}
+                <button type="button" className="link" onClick={() => goTo('enharmonie-fonction')}>
+                  développée plus bas
+                </button>
+                , une fois la gamme et l’armure en place.
               </p>
             </>
           ),
@@ -399,6 +417,117 @@ function buildChapters(scaleKey: ScaleKey): Chapter[] {
             </>
           ),
         },
+        {
+          id: 'enharmonie-fonction',
+          name: 'Enharmonie : pourquoi l’orthographe n’est pas libre',
+          body: (
+            <>
+              <p>
+                Deux notes enharmoniques sonnent pareil. Pourtant, dans une gamme donnée, une
+                seule des deux écritures est juste — l’autre est une faute, qui ne s’entend pas
+                mais se lit. La règle qui tranche tient en une phrase :
+              </p>
+              <p className="lexicon__rule">
+                Une gamme majeure a sept degrés, et l’alphabet musical sept lettres.{' '}
+                <strong>Chaque lettre apparaît une fois, et une seule.</strong>
+              </p>
+              <p>
+                Dès que la tonique est choisie, toutes les lettres sont donc déterminées. Il ne
+                reste qu’à décider l’altération de chacune.
+              </p>
+
+              <p>
+                Prenons <strong>mi majeur</strong>. Son 7<sup>e</sup> degré doit sonner un
+                demi-ton sous la tonique : ce son s’écrit <em>ré♯</em> ou <em>mi♭</em>, et c’est
+                la même touche du piano.
+              </p>
+              <ul className="lexicon__table">
+                <li>
+                  <span className="lexicon__term">avec ré♯</span>
+                  <span className="lexicon__gap">mi fa sol la si do ré</span>
+                  <span className="lexicon__example lexicon__example--ok">
+                    sept lettres distinctes
+                  </span>
+                </li>
+                <li>
+                  <span className="lexicon__term">avec mi♭</span>
+                  <span className="lexicon__gap">mi fa sol la si do mi</span>
+                  <span className="lexicon__example lexicon__example--ko">
+                    mi deux fois, ré disparu
+                  </span>
+                </li>
+              </ul>
+
+              <div className="lexicon__staves">
+                <figure className="lexicon__staff">
+                  <figcaption>Correct — ré♯ au 7ᵉ degré</figcaption>
+                  <Staff
+                    slots={E_MAJOR}
+                    lowDiatonic={STAFF_LOW}
+                    highDiatonic={STAFF_HIGH}
+                    readOnly
+                  />
+                </figure>
+                <figure className="lexicon__staff">
+                  <figcaption className="lexicon__staff-caption--ko">
+                    Fautif — mi♭ au 7ᵉ degré
+                  </figcaption>
+                  <Staff
+                    slots={E_MAJOR_MISSPELLED}
+                    lowDiatonic={STAFF_LOW}
+                    highDiatonic={STAFF_HIGH}
+                    readOnly
+                  />
+                </figure>
+              </div>
+              <p>
+                <Listen notes={E_MAJOR} label="mi majeur" interval={0.34} />{' '}
+                <Listen notes={[DSHARP5, E5]} label="ré♯ → mi, la sensible se résout" />
+              </p>
+              <p>
+                Sur la portée, la faute saute aux yeux : une gamme bien écrite est un escalier
+                régulier, une marche par degré. Avec mi♭, les deux dernières notes se posent au
+                même endroit — l’escalier se casse, et l’œil perd le repère qui lui permet de
+                lire vite.
+              </p>
+
+              <p>
+                Trois raisons se superposent, de la plus pratique à la plus profonde.
+              </p>
+              <ol className="lexicon__reasons">
+                <li>
+                  <strong>L’armure deviendrait impossible.</strong> Mi majeur s’écrit avec
+                  quatre dièses à la clé — fa, do, sol, ré. Cette armure dit «&nbsp;tous les ré
+                  sont dièses&nbsp;». Un mi♭ ne pourrait pas y figurer : il faudrait l’écrire à
+                  la main devant chaque occurrence, en contredisant la clé.
+                </li>
+                <li>
+                  <strong>Les intervalles se nomment par les lettres, pas par les sons.</strong>{' '}
+                  Ré → fa♯ compte trois lettres (ré, mi, fa) : c’est une <em>tierce</em>. Ré →
+                  sol♭ en compte quatre : c’est une <em>quarte</em>. Les deux font pourtant
+                  quatre demi-tons et sortent la même touche. Mais la gamme majeure exige que
+                  son 3<sup>e</sup> degré soit une tierce au-dessus de la tonique — c’est la
+                  définition du degré. Écrire sol♭ produirait une quarte diminuée : le bon son
+                  avec la mauvaise fonction.{' '}
+                  <Listen notes={[D4, FSHARP4]} label="ré → fa♯ — tierce ou quarte, au choix" />
+                </li>
+                <li>
+                  <strong>L’orthographe encode la fonction.</strong> C’est la raison de fond.
+                  Ré♯ est la <em>sensible</em> de mi majeur : elle est attirée vers le haut, elle
+                  appelle le mi. Mi♭ est la <em>tonique</em> de mi♭ majeur : un point de repos.
+                  Même son, deux objets musicaux qui ne feront jamais la même chose dans un
+                  morceau.
+                </li>
+              </ol>
+
+              <p className="section__note">
+                C’est exactement pourquoi, dans le code, une note est une lettre, une altération
+                et une octave — jamais un numéro MIDI. 61 désigne aussi bien do♯ que ré♭, et
+                confondre les deux rendrait toute correction d’écriture impossible.
+              </p>
+            </>
+          ),
+        },
       ],
     },
     {
@@ -520,9 +649,16 @@ function buildChapters(scaleKey: ScaleKey): Chapter[] {
 }
 
 export function LexiconSection({ scaleKey }: LexiconSectionProps) {
-  const chapters = useMemo(() => buildChapters(scaleKey), [scaleKey])
   const rootRef = useRef<HTMLDivElement | null>(null)
   const [activeId, setActiveId] = useState<string>('hauteur')
+
+  const goTo = useCallback((id: string) => {
+    rootRef.current
+      ?.querySelector(`[data-anchor="${id}"]`)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [])
+
+  const chapters = useMemo(() => buildChapters(scaleKey, goTo), [goTo, scaleKey])
 
   /**
    * Le conteneur de défilement est la zone de contenu, pas la fenêtre : c'est
@@ -547,12 +683,6 @@ export function LexiconSection({ scaleKey }: LexiconSectionProps) {
     scroller.addEventListener('scroll', update, { passive: true })
     return () => scroller.removeEventListener('scroll', update)
   }, [chapters])
-
-  const goTo = (id: string) => {
-    rootRef.current
-      ?.querySelector(`[data-anchor="${id}"]`)
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   return (
     <div className="lexicon" ref={rootRef}>
