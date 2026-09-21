@@ -37,15 +37,36 @@ export interface StaffProps {
 /** En clé de sol, la ligne du haut porte un fa5. */
 const TREBLE_TOP_LINE = diatonicIndex({ letter: 'F', octave: 5 })
 
-const HEIGHT = 190
-const STAVE_TOP = 50
+/**
+ * Agrandissement du dessin. VexFlow grave avec un interligne de 10 px, ce qui
+ * laisse 5 px entre deux degrés voisins : trop peu pour viser à la souris.
+ * On met tout à l'échelle — portée, clé, notes — plutôt que d'écarter les
+ * seules lignes, qui donnerait des têtes de notes trop petites.
+ */
+const SCALE = 1.6
+const HEIGHT = 178
+/**
+ * Marge au-dessus du dessin. VexFlow réserve déjà quatre interlignes au-dessus
+ * de la portée (spaceAboveStaffLn) pour les nuances et les liaisons : ils
+ * s'ajoutent à cette valeur, qui reste donc minuscule.
+ */
+const STAVE_TOP = 4
 
 const COLORS = {
   correct: '#1a7f5a',
   wrong: '#c0392b',
   selected: '#2f6fd0',
-  normal: '#17171b',
 } as const
+
+/**
+ * VexFlow grave en noir par défaut, ce qui disparaît sur un thème sombre.
+ * On lui donne la couleur de texte effective du conteneur : la portée suit
+ * alors le thème sans que le composant ait à le connaître.
+ */
+function inkColor(host: HTMLElement): string {
+  const color = window.getComputedStyle(host).color
+  return color === '' ? '#17171b' : color
+}
 
 interface Geometry {
   slotX: number[]
@@ -68,6 +89,15 @@ export function Staff({
   const [width, setWidth] = useState(720)
   const [geometry, setGeometry] = useState<Geometry | null>(null)
   const [hover, setHover] = useState<{ index: number; diatonic: number } | null>(null)
+  const [scheme, setScheme] = useState(0)
+
+  // Le passage clair/sombre change la couleur d'encre : il faut redessiner.
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-color-scheme: dark)')
+    const onChange = () => setScheme((value) => value + 1)
+    query.addEventListener('change', onChange)
+    return () => query.removeEventListener('change', onChange)
+  }, [])
 
   // La portée est dessinée en pixels : sa largeur doit suivre le conteneur.
   useEffect(() => {
@@ -89,7 +119,17 @@ export function Staff({
     renderer.resize(width, HEIGHT)
     const context: RenderContext = renderer.getContext()
 
-    const stave = new Stave(8, STAVE_TOP, width - 16)
+    // La couleur par défaut du contexte s'applique à tout ce qui n'a pas de
+    // style propre : lignes de portée, clé, hampes. Les notes, elles, portent
+    // leur propre style de correction.
+    const ink = inkColor(host)
+    context.setFillStyle(ink)
+    context.setStrokeStyle(ink)
+
+    context.scale(SCALE, SCALE)
+
+    const innerWidth = width / SCALE
+    const stave = new Stave(8, STAVE_TOP / SCALE, innerWidth - 16)
     stave.addClef('treble')
     stave.setContext(context).draw()
 
@@ -114,8 +154,12 @@ export function Staff({
             ? COLORS.wrong
             : index === selectedIndex
               ? COLORS.selected
-              : COLORS.normal
+              : ink
       staveNote.setStyle({ fillStyle: color, strokeStyle: color })
+      // Les lignes supplémentaires ont leur propre style dans VexFlow et ne
+      // suivent pas celui de la note : sans cela, le do central reste gravé
+      // en gris sombre, invisible sur fond foncé.
+      staveNote.setLedgerLineStyle({ fillStyle: color, strokeStyle: color, lineWidth: 1.4 })
 
       return staveNote
     })
@@ -123,16 +167,18 @@ export function Staff({
     const voice = new Voice({ numBeats: slots.length, beatValue: 4 })
     voice.setMode(Voice.Mode.SOFT)
     voice.addTickables(notes)
-    new Formatter().joinVoices([voice]).format([voice], width - stave.getNoteStartX() - 40)
+    new Formatter().joinVoices([voice]).format([voice], innerWidth - stave.getNoteStartX() - 24)
     voice.draw(context, stave)
 
+    // La géométrie est exposée en pixels de page : l'échelle est absorbée ici,
+    // pour que le calcul du clic n'ait pas à la connaître.
     setGeometry({
-      slotX: notes.map((note) => note.getAbsoluteX()),
-      topLineY: stave.getYForLine(0),
-      spacing: stave.getSpacingBetweenLines(),
-      noteStartX: stave.getNoteStartX(),
+      slotX: notes.map((note) => note.getAbsoluteX() * SCALE),
+      topLineY: stave.getYForLine(0) * SCALE,
+      spacing: stave.getSpacingBetweenLines() * SCALE,
+      noteStartX: stave.getNoteStartX() * SCALE,
     })
-  }, [slots, statuses, selectedIndex, width])
+  }, [slots, statuses, selectedIndex, width, scheme])
 
   /** Convertit une ordonnée en degré diatonique, borné à l'étendue autorisée. */
   const diatonicAt = useCallback(

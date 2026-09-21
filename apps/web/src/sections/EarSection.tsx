@@ -111,6 +111,7 @@ export function EarSection({ scaleKey, mode, onModeChange, verdict, onVerdict }:
       handleCalibrationAnswer(played)
       return
     }
+    // Hors exercice, le clavier reste jouable : on l'explore sans être noté.
     if (phase !== 'asking' || question === null) return
 
     const correct = isCorrectAnswer(question, played)
@@ -248,10 +249,14 @@ export function EarSection({ scaleKey, mode, onModeChange, verdict, onVerdict }:
           highlighted={!inCalibration && mode === 'relative' && guided ? scale : undefined}
           feedback={
             phase === 'answered' && question !== null && answer !== null
-              ? { note: isCorrect ? question.target : answer, kind: isCorrect ? 'correct' : 'wrong' }
+              ? isCorrect
+                ? [{ note: question.target, kind: 'correct' as const }]
+                : [
+                    { note: answer, kind: 'wrong' as const },
+                    { note: question.target, kind: 'correct' as const },
+                  ]
               : null
           }
-          disabled={phase === 'idle'}
           onNote={handleAnswer}
         />
 

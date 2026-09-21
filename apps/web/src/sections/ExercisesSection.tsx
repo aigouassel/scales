@@ -63,21 +63,18 @@ export function ExercisesSection({ scaleKey, onSolved }: ExercisesSectionProps) 
     [alteration],
   )
 
-  /** La palette agit sur la note sélectionnée si elle existe, sinon sur la suivante. */
+  /**
+   * La palette est une plume : elle règle ce qui sera écrit au prochain clic,
+   * et ne touche à aucune note déjà posée.
+   *
+   * La faire agir aussi sur la note sélectionnée paraissait pratique, mais
+   * produisait l'inverse : comme poser une note la sélectionne, choisir un
+   * bémol pour la note SUIVANTE altérait silencieusement la précédente. Pour
+   * corriger une note, on la réécrit — un clic au même endroit avec l'autre
+   * plume.
+   */
   const chooseAlteration = (value: Alteration) => {
     setAlteration(value)
-    if (selected === null) return
-    const current = slots[selected]
-    if (current === undefined || current === null) return
-
-    setStatuses(null)
-    const updated = pitch(current.letter, value, current.octave)
-    setSlots((previous) => {
-      const next = [...previous]
-      next[selected] = updated
-      return next
-    })
-    void notePlayer.unlock().then(() => notePlayer.play(updated, { duration: 0.8 }))
   }
 
   const clearSelected = useCallback(() => {
@@ -139,9 +136,10 @@ export function ExercisesSection({ scaleKey, onSolved }: ExercisesSectionProps) 
         <div>
           <h2>Écrire la gamme de {scaleKey.name}</h2>
           <p className="section__lead">
-            Posez les huit notes sur la portée, de la tonique à son octave. Choisissez
-            l’altération avant de cliquer, ou sélectionnez une note déjà posée pour la
-            modifier.
+            Posez les huit notes sur la portée, de la tonique à son octave. L’altération
+            choisie s’applique au prochain clic ; pour corriger une note, recliquez au
+            même endroit avec une autre altération. <kbd>←</kbd> <kbd>→</kbd> déplacent la
+            sélection, <kbd>Suppr</kbd> efface la note sélectionnée.
           </p>
         </div>
       </header>

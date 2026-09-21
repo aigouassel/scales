@@ -16,8 +16,12 @@ export interface PianoProps {
   preferFlats?: boolean
   /** Notes mises en évidence — typiquement la gamme étudiée. */
   highlighted?: readonly Pitch[]
-  /** Retour visuel ponctuel après une réponse. */
-  feedback?: { note: Pitch; kind: 'correct' | 'wrong' } | null
+  /**
+   * Retour visuel après une réponse. Plusieurs marques sont possibles : sur une
+   * erreur, montrer aussi où se trouvait la bonne note est le moment où l'on
+   * apprend quelque chose.
+   */
+  feedback?: readonly { note: Pitch; kind: 'correct' | 'wrong' }[] | null
   showNoteNames?: boolean
   /** Écoute le clavier physique. À désactiver quand un champ a le focus. */
   captureKeyboard?: boolean
@@ -110,10 +114,11 @@ export function Piano({
     labels?.get(slot.code)?.toUpperCase() ?? slot.azertyLabel.toUpperCase()
 
   const feedbackClass = (slot: KeySlot): string => {
-    if (feedback === null) return ''
+    if (feedback === null || feedback === undefined) return ''
     const note = slotToPitch(slot, preferFlats)
-    if (pitchClass(note) !== pitchClass(feedback.note)) return ''
-    return feedback.kind === 'correct' ? ' piano__key--correct' : ' piano__key--wrong'
+    const mark = feedback.find((entry) => pitchClass(entry.note) === pitchClass(note))
+    if (mark === undefined) return ''
+    return mark.kind === 'correct' ? ' piano__key--correct' : ' piano__key--wrong'
   }
 
   const renderKey = (slot: KeySlot) => {

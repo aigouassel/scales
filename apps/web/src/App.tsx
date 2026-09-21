@@ -96,7 +96,7 @@ export function App() {
             <span className="key-chip__signature">
               {key.accidentalCount === 0
                 ? '—'
-                : (key.accidentalKind === 'sharp' ? '♯' : '♭').repeat(key.accidentalCount)}
+                : `${key.accidentalCount} ${key.accidentalKind === 'sharp' ? '♯' : '♭'}`}
             </span>
           </button>
         ))}
