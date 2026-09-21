@@ -29,13 +29,19 @@ trois exercices indépendants.
 
 ## Ce qui est persisté
 
-Sous le préfixe `scales.v1.` : la progression choisie, la tonalité en cours, le
-mode d’oreille, le verdict du calibrage et la liste des gammes écrites sans
-faute.
+Sous le préfixe `scales.v1.` : la section ouverte, la progression choisie, la
+tonalité en cours, le mode d’oreille, le verdict du calibrage et la liste des
+gammes écrites sans faute. Un rafraîchissement rouvre donc la page sur ce qu’on
+était en train de travailler.
 
 Toutes les lectures sont défensives — le stockage peut être désactivé, plein,
 ou contenir des données d’une version antérieure. Une valeur illisible retombe
 sur la valeur par défaut au lieu de casser l’application.
+
+La relecture ne suffit pas : les valeurs sont aussi **validées**. Un onglet
+inconnu afficherait une section vide, et une progression inconnue ferait
+planter la lecture de ses tonalités — l’une comme l’autre retombent sur leur
+valeur par défaut.
 
 ## Points d’attention
 

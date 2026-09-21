@@ -29,7 +29,7 @@ export function App() {
     'fifths',
   )
   const [keyId, setKeyId] = usePersistentState<string>('key', 'C')
-  const [tab, setTab] = useState<Tab>('exercises')
+  const [storedTab, setTab] = usePersistentState<Tab>('tab', 'exercises')
   const [earMode, setEarMode] = usePersistentState<EarMode>('earMode', 'relative')
   const [verdict, setVerdict] = usePersistentState<CalibrationVerdict | null>('verdict', null)
   const [solved, setSolved] = usePersistentState<string[]>('solved', [])
@@ -37,7 +37,14 @@ export function App() {
 
   useEffect(() => notePlayer.onEngineChange(setEngine), [])
 
-  const progression = PROGRESSIONS[progressionId]
+  /**
+   * Les valeurs relues du stockage sont validées avant usage. Elles peuvent
+   * venir d'une version antérieure de l'application, ou avoir été modifiées à
+   * la main : un onglet inconnu afficherait une section vide, et une
+   * progression inconnue ferait planter la lecture de ses tonalités.
+   */
+  const tab: Tab = TABS.some((item) => item.id === storedTab) ? storedTab : 'exercises'
+  const progression = PROGRESSIONS[progressionId] ?? PROGRESSIONS.fifths
 
   // Les deux progressions n'emploient pas les mêmes orthographes de tonique :
   // fa♯ existe côté quintes, sol♭ côté degrés. On retombe sur do si besoin.
