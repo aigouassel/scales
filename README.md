@@ -235,10 +235,24 @@ fait 5 px, soit une cible trop petite pour viser une hauteur à la souris.
 
 ---
 
+## Mise en page
+
+Les trois sections de travail — Exercices, Jouer, Oreille — tiennent
+**exactement dans la fenêtre** et ne défilent pas : ce sont des instruments,
+qu’on veut entiers et au même endroit, comme un pupitre. La portée et le
+clavier mesurent la place qu’on leur laisse et s’y adaptent.
+
+Le Lexique fait exception : c’est un texte long, il défile, et un sommaire
+collé en marge suit la lecture.
+
+---
+
 ## Documentation
 
-- [`docs/v1.md`](docs/v1.md) — ce que permet cette première version, les
+- [`docs/v1.md`](docs/v1.md) — ce que permet la première version, les
   décisions qui la définissent, ses limites et les pistes qui suivraient.
+- [`docs/v2.md`](docs/v2.md) — la reprise de la mise en page : pleine fenêtre,
+  barre de navigation, sommaire du lexique.
 - [`packages/music-theory`](packages/music-theory/README.md) — le noyau musical.
 - [`packages/audio`](packages/audio/README.md) — la lecture des notes.
 - [`packages/ui`](packages/ui/README.md) — le clavier et la portée.

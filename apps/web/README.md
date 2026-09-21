@@ -28,6 +28,19 @@ La tonalité vit dans `App` : passer d’une section à l’autre ne la change p
 C’est ce qui fait tenir la promesse « une gamme, trois portes » plutôt que
 trois exercices indépendants.
 
+## La fenêtre est le cadre
+
+`.app` occupe `100dvh` et ne défile pas. Navbar et barre de contexte sont des
+éléments `flex: none` de cette colonne : elles restent en haut sans
+`position: fixed`, et sans le décalage de contenu qu’il impose.
+
+Chaque section est elle-même une colonne — en-tête, aide, **scène**, résultat,
+actions — dont seule la scène porte `flex: 1`. C’est elle qui absorbe la
+hauteur disponible, et la portée comme le clavier s’y adaptent au lieu de
+pousser le reste hors de l’écran.
+
+Le Lexique est la seule exception : `.app__main` y devient défilant.
+
 ## Ce qui est persisté
 
 Sous le préfixe `scales.v1.` : la section ouverte, la progression choisie, la
