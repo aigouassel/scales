@@ -91,6 +91,13 @@ l’édition est construite par-dessus.
   prévisible exactement depuis la géométrie pré-dessin. Plutôt que de la
   deviner, la portée **mesure le dessin obtenu** et recale chaque tête sur le
   centre de son emplacement, à la lecture du `getBBox()` du groupe de notehead.
+
+  Le recalage est une **translation SVG du groupe dessiné**, et non un
+  `setXShift()` avant rendu. `setXShift()` déplace bien la tête, mais laisse
+  ses modificateurs là où le formateur les avait posés : l’altération se
+  détachait de sa note, d’autant plus que le décalage était grand. Une
+  translation emporte tout — tête, altération, hampe, lignes supplémentaires —
+  et préserve la gravure telle que VexFlow l’a calculée.
 - **Échelle déduite de la place disponible.** À la taille native, un
   demi-interligne fait 5 px — une cible trop petite pour viser une hauteur à la
   souris. La portée mesure la boîte qu’on lui alloue et agrandit tout

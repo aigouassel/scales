@@ -226,20 +226,21 @@ export function Staff({
     const firstX = stave.getNoteStartX() + 14
     const step = (innerWidth - firstX - 18) / slots.length
     const targets = notes.map((_, index) => firstX + step * (index + 0.5))
-    notes.forEach((note, index) => {
-      note.setXShift((targets[index] as number) - note.getAbsoluteX())
-    })
 
     voice.draw(context, stave)
 
     /**
-     * Recalage des têtes de notes, après dessin.
+     * Mise sur la grille, après dessin.
      *
-     * VexFlow réserve à gauche de la tête la place de ses modificateurs —
-     * l'altération — et sa géométrie pré-dessin ne permet pas de prévoir cette
-     * réserve avec exactitude : une note altérée se posait une dizaine de
-     * pixels à gauche de son emplacement. Plutôt que de deviner, on mesure le
-     * dessin obtenu et on le corrige.
+     * On translate le GROUPE dessiné de chaque note, plutôt que de décaler la
+     * note avant le rendu. `setXShift()` déplace bien la tête, mais laisse ses
+     * modificateurs là où le formateur les avait posés : l'altération se
+     * détachait de sa note, d'autant plus que le décalage était grand.
+     *
+     * Une translation SVG emporte tout — tête, altération, hampe, lignes
+     * supplémentaires — et préserve donc la gravure telle que VexFlow l'a
+     * calculée. On mesure la tête obtenue et on l'amène sur le centre de son
+     * emplacement.
      *
      * Les cases vides sont des notes fantômes, qui ne produisent aucun
      * élément : le k-ième groupe dessiné correspond donc au k-ième
