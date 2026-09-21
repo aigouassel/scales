@@ -443,8 +443,14 @@ body {
 
 /* --- Lecture de note --- */
 
+/* Même hauteur que le bandeau de la page « Oreille » : les deux pages
+   encadrent leur clavier de la même façon, et il ne saute pas d'un onglet
+   à l'autre. */
 .readout {
-  min-height: 46px;
+  flex: none;
+  min-height: 92px;
+  display: flex;
+  align-items: center;
   padding: 10px 14px;
   border-radius: var(--radius);
   background: var(--bg);
@@ -544,6 +550,16 @@ body {
 }
 
 /* --- Oreille --- */
+
+/* Bandeau sous le clavier : il tient la même place que le rappel de note de
+   la page « Jouer », pour que les deux pages se superposent. */
+.ear-footer {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 92px;
+}
 
 .ear-panel {
   display: flex;

@@ -41,6 +41,11 @@ pousser le reste hors de l’écran.
 
 Le Lexique est la seule exception : `.app__main` y devient défilant.
 
+**Jouer et Oreille encadrent leur clavier de la même façon** — une scène
+centrée au-dessus, un bandeau de même hauteur en dessous : le rappel de note
+d'un côté, la consigne et les boutons de l'autre. Le clavier occupe ainsi la
+même position sur les deux pages et ne saute pas quand on change d'onglet.
+
 ## Ce qui est persisté
 
 Sous le préfixe `scales.v1.` : la section ouverte, la progression choisie, la

@@ -218,7 +218,29 @@ export function EarSection({ scaleKey, mode, onModeChange, verdict, onVerdict }:
         )}
       </p>
 
+      {/* Le clavier occupe la scène et s'y centre, exactement comme sur
+          « Jouer » : d'un onglet à l'autre, il ne saute pas. Ce qui relève de
+          la question — consigne, boutons, verdict — passe en dessous, à la
+          place qu'occupe le rappel de note sur « Jouer ». */}
       <div className="stage stage--center">
+        <Piano
+          preferFlats={preferFlats}
+          highlighted={!inCalibration && mode === 'relative' && guided ? scale : undefined}
+          feedback={
+            phase === 'answered' && question !== null && answer !== null
+              ? isCorrect
+                ? [{ note: question.target, kind: 'correct' as const }]
+                : [
+                    { note: answer, kind: 'wrong' as const },
+                    { note: question.target, kind: 'correct' as const },
+                  ]
+              : null
+          }
+          onNote={handleAnswer}
+        />
+      </div>
+
+      <div className="ear-footer">
         {inCalibration ? (
           <div className="ear-panel">
             <p className="ear-panel__step">
@@ -316,22 +338,6 @@ export function EarSection({ scaleKey, mode, onModeChange, verdict, onVerdict }:
           </div>
         )}
       </div>
-
-      <Piano
-        preferFlats={preferFlats}
-        highlighted={!inCalibration && mode === 'relative' && guided ? scale : undefined}
-        feedback={
-          phase === 'answered' && question !== null && answer !== null
-            ? isCorrect
-              ? [{ note: question.target, kind: 'correct' as const }]
-              : [
-                  { note: answer, kind: 'wrong' as const },
-                  { note: question.target, kind: 'correct' as const },
-                ]
-            : null
-        }
-        onNote={handleAnswer}
-      />
     </section>
   )
 }

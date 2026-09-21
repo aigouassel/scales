@@ -72,7 +72,7 @@ export function PlaySection({ scaleKey }: PlaySectionProps) {
       <p className="hint">
         Les touches <kbd>q</kbd> à <kbd>l</kbd> donnent les blanches, <kbd>z</kbd> à{' '}
         <kbd>o</kbd> les noires. Les deux touches inertes tombent là où le piano n’a pas de
-        touche noire — entre mi et fa, et entre si et do.
+        touche noire.
       </p>
 
       <div className="stage stage--center">
