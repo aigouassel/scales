@@ -49,6 +49,26 @@ de la musique.
 Un jeton interne interrompt la séquence en cours quand une nouvelle démarre —
 deux gammes ne peuvent pas se superposer.
 
+## Le masque
+
+`playMask()` joue six demi-tons contigus, ensemble, pendant deux secondes.
+
+Dans un exercice d’oreille absolue, deux sons restent disponibles en mémoire et
+servent de diapason : la note précédente, et surtout **celle qu’on vient de
+jouer pour répondre** — dont on connaît le nom, puisqu’on l’a choisie. Ni le
+tirage ni l’espacement ne peuvent les effacer : ils sont dans l’auditeur, pas
+dans la séquence.
+
+Un agrégat chromatique sature ces traces. Il n’a ni fondamentale ni centre
+tonal, il ne laisse donc aucun repère derrière lui. Placé avant chaque question,
+il efface les deux d’un coup.
+
+La durée compte : un masque court laisse la trace intacte, la mémoire échoïque
+tenant plus d’une seconde.
+
+C’est le procédé standard des protocoles de psychoacoustique. Il est
+désagréable à entendre, et c’est exactement à ça qu’on le reconnaît.
+
 ## Pourquoi pas ffmpeg
 
 ffmpeg traite des fichiers audio et vidéo hors temps réel. Jouer une note quand

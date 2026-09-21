@@ -6,7 +6,7 @@
  * de l'application ne sait pas lequel joue.
  */
 
-import { toFrequency, toMidi, type Pitch } from '@scales/music-theory'
+import { pitch, toFrequency, toMidi, type Pitch } from '@scales/music-theory'
 import { playSynthNote, type SynthVoice } from './synth'
 
 export type AudioEngine = 'loading' | 'sampled' | 'synth'
@@ -144,6 +144,44 @@ export class NotePlayer {
     })
 
     if (token !== this.sequenceToken) return
+  }
+
+  /**
+   * Joue un agrégat chromatique bref : un « masque ».
+   *
+   * Entre deux notes d'un test d'oreille absolue, la note précédente reste
+   * disponible en mémoire échoïque et sert de diapason — c'est la fuite que
+   * ni le tirage ni l'espacement ne peuvent fermer. Six demi-tons contigus
+   * joués ensemble saturent cette trace : l'agrégat n'a ni fondamentale ni
+   * centre tonal, il ne laisse donc aucun repère derrière lui.
+   *
+   * Deux secondes par défaut. Un masque court laisse la trace intacte : il
+   * faut qu'il dure assez pour que la note précédente cesse d'être disponible,
+   * et la mémoire échoïque tient plus d'une seconde.
+   *
+   * C'est le procédé standard des protocoles de psychoacoustique. Il est
+   * désagréable à entendre, et c'est exactement à ça qu'on le reconnaît.
+   */
+  playMask(options: { duration?: number; delay?: number } = {}): void {
+    const duration = options.duration ?? 2
+    const delay = options.delay ?? 0
+    // Registre medium : assez haut pour masquer, assez bas pour rester supportable.
+    const root = 55
+    for (let step = 0; step < 6; step += 1) {
+      const midi = root + step
+      const octave = Math.floor(midi / 12) - 1
+      const letters = ['C', 'C', 'D', 'D', 'E', 'F', 'F', 'G', 'G', 'A', 'A', 'B'] as const
+      const alterations = [0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0] as const
+      const index = midi % 12
+      const letter = letters[index]
+      const alteration = alterations[index]
+      if (letter === undefined || alteration === undefined) continue
+      this.play(pitch(letter, alteration, octave), {
+        duration,
+        velocity: 0.28,
+        delay,
+      })
+    }
   }
 
   stopAll(): void {
