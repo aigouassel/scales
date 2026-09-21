@@ -71,59 +71,128 @@ kbd {
   font-size: 0.82em;
 }
 
+/* ---------------------------------------------------------------------------
+   Coquille : la fenêtre est le cadre.
+
+   L'application occupe exactement la hauteur du viewport et ne défile pas.
+   Navbar et barre de contexte sont des éléments `flex: none` d'une colonne
+   de 100dvh : elles restent en haut sans `position: fixed`, et sans le
+   décalage de contenu que celui-ci impose.
+   --------------------------------------------------------------------------- */
+
+html,
+body {
+  height: 100%;
+}
+
 .app {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 32px 20px 64px;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  overflow: hidden;
 }
 
-.app__header {
+.navbar {
+  flex: none;
   display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  gap: 18px;
+  height: 52px;
+  padding: 0 18px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
 }
 
-.app__brand h1 {
-  font-size: 1.9rem;
+.navbar__brand {
+  font-family: ui-serif, Georgia, 'Times New Roman', serif;
+  font-size: 1.12rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
-.app__brand p {
-  margin: 4px 0 0;
-  color: var(--text-soft);
-}
-
-.app__progression {
+.navbar__tabs {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 340px;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
 }
 
-.app__progression-note {
-  margin: 0;
-  font-size: 0.82rem;
+.tab {
+  padding: 6px 13px;
+  border: none;
+  border-radius: 8px;
+  background: none;
   color: var(--text-soft);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
 }
 
-.label {
-  font-size: 0.74rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.tab:hover {
+  color: var(--text);
+}
+
+.tab--active {
+  background: var(--accent-soft);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.navbar__engine {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
   color: var(--text-soft);
+  white-space: nowrap;
 }
 
-/* --- Sélecteur de tonalité --- */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.dot--loading {
+  background: var(--border-soft);
+}
+
+.dot--sampled {
+  background: var(--success);
+}
+
+.dot--synth {
+  background: #d69a3a;
+}
+
+/* --- Barre de contexte : ce qu'on étudie, valable pour toutes les sections --- */
+
+.context {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.context__progression {
+  display: flex;
+  gap: 5px;
+  flex: none;
+}
 
 .keys {
   display: flex;
-  gap: 6px;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 2px;
 }
 
 .key-chip {
@@ -131,14 +200,14 @@ kbd {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
-  min-width: 58px;
-  padding: 7px 10px;
+  min-width: 50px;
+  padding: 3px 9px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 8px;
   background: var(--surface);
   color: var(--text);
   font: inherit;
+  line-height: 1.25;
   cursor: pointer;
   position: relative;
   transition: border-color 120ms ease, background-color 120ms ease;
@@ -156,79 +225,136 @@ kbd {
 .key-chip--solved::after {
   content: '✓';
   position: absolute;
-  top: 3px;
-  right: 5px;
-  font-size: 0.65rem;
+  top: 0;
+  right: 3px;
+  font-size: 0.6rem;
   color: var(--success);
 }
 
 .key-chip__name {
+  font-size: 0.88rem;
   font-weight: 600;
 }
 
 .key-chip__signature {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--text-soft);
-  letter-spacing: -0.06em;
 }
 
-/* --- Onglets --- */
+/* --- Zone de contenu --- */
 
-.tabs {
+.app__main {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  padding: 14px 18px 18px;
 }
 
-.tab {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1px;
-  padding: 9px 14px;
-  border: none;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--text-soft);
-  font: inherit;
-  cursor: pointer;
-  text-align: left;
+/* Le lexique est la seule section qui défile : c'est un texte, pas un atelier. */
+.app__main--scrollable {
+  display: block;
+  overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
-.tab--active {
-  color: var(--text);
-  border-bottom-color: var(--accent);
-}
+/* ---------------------------------------------------------------------------
+   Sections : trois bandeaux fixes et une scène élastique.
 
-.tab__label {
-  font-weight: 600;
-}
-
-.tab__hint {
-  font-size: 0.74rem;
-  color: var(--text-soft);
-}
-
-/* --- Sections --- */
+   Chaque section est une colonne — en-tête, aide, scène, résultat, actions.
+   Seule la scène porte `flex: 1`, si bien que c'est elle qui absorbe la
+   hauteur disponible : la portée et le clavier s'y adaptent au lieu de
+   pousser le reste hors de la fenêtre.
+   --------------------------------------------------------------------------- */
 
 .section {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 22px;
+  gap: 12px;
+  padding: 16px 20px 18px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.section__header h2 {
-  font-size: 1.32rem;
+.bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
 }
 
-.section__lead {
-  margin: 6px 0 0;
+.bar h2 {
+  font-size: 1.18rem;
+  margin-right: 4px;
+}
+
+.bar__meta {
+  font-size: 0.82rem;
   color: var(--text-soft);
-  max-width: 62ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar__spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.bar--footer {
+  padding-top: 2px;
+}
+
+.hint {
+  flex: none;
+  margin: 0;
+  font-size: 0.83rem;
+  color: var(--text-soft);
+  max-width: 96ch;
+}
+
+.hint__reveal {
+  color: var(--accent);
+}
+
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stage--center {
+  justify-content: center;
+}
+
+/* Deux portées se partagent la scène ; chacune reçoit donc la moitié de la
+   hauteur, et s'y redessine à l'échelle qui convient. */
+.stage__staff {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.stage__label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.stage__label--expected {
+  color: var(--success);
 }
 
 .section__note {
@@ -237,29 +363,8 @@ kbd {
   color: var(--text-soft);
 }
 
-.mode-note {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--text-soft);
-}
-
 /* --- Contrôles --- */
 
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.toolbar--end {
-  justify-content: flex-end;
-}
-
-.toolbar--center {
-  justify-content: center;
-}
 
 .toolbar__group {
   display: flex;
@@ -359,36 +464,6 @@ kbd {
   border-color: transparent;
 }
 
-.diff {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.88rem;
-}
-
-.diff li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: baseline;
-}
-
-.diff__degree {
-  min-width: 190px;
-  color: var(--text-soft);
-}
-
-.diff__expected {
-  font-weight: 600;
-  color: var(--success);
-}
-
-.diff__written {
-  color: var(--error);
-}
 
 /* --- Lecture de note --- */
 
@@ -424,15 +499,95 @@ kbd {
   color: var(--error);
 }
 
+/* --- Résultat compact, commun aux exercices et à l'oreille --- */
+
+.result {
+  flex: none;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  padding: 9px 13px;
+  border-radius: var(--radius);
+  font-size: 0.87rem;
+}
+
+.result--success {
+  background: var(--success-soft);
+}
+
+.result--error {
+  background: var(--error-soft);
+}
+
+/* Les écarts tiennent sur une ligne : en pleine fenêtre, une liste verticale
+   de huit entrées coûterait toute la place de la portée. */
+.result__item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.result__degree {
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.result__written {
+  color: var(--error);
+}
+
+/* Un séparateur explicite : les écarts sont lus en diagonale, l'espacement
+   seul ne suffit pas à les découper. */
+.result__item:not(:last-child)::after {
+  content: '·';
+  margin-left: 8px;
+  color: var(--border-soft);
+}
+
 /* --- Oreille --- */
 
-.ear {
+.ear-panel {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.ear-panel__prompt {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text-soft);
+}
+
+.ear-panel__step {
+  margin: 0;
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ear-panel__step span {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
+.ear-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
 .ear__progress {
+  width: 100%;
+  max-width: 320px;
   height: 4px;
   border-radius: 999px;
   background: var(--border);
@@ -445,79 +600,62 @@ kbd {
   transition: width 220ms ease;
 }
 
-.ear__score {
-  margin: 0;
-  text-align: center;
-  color: var(--text-soft);
-  font-size: 0.88rem;
+.badge {
+  padding: 4px 11px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.calibration {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border);
+.badge--absolute {
+  background: var(--success-soft);
+  color: var(--success);
 }
 
-.calibration h3 {
-  font-size: 1.05rem;
-}
-
-.calibration p {
-  margin: 0;
-  color: var(--text-soft);
-  max-width: 68ch;
+.badge--relative,
+.badge--inconclusive {
+  background: var(--accent-soft);
+  color: var(--text);
 }
 
 .verdict {
   display: flex;
   gap: 16px;
   align-items: center;
-  padding: 14px 16px;
+  text-align: left;
+  padding: 16px 18px;
   border-radius: var(--radius);
-  background: var(--bg);
-  border: 1px solid var(--border);
 }
 
 .verdict--absolute {
   background: var(--success-soft);
-  border-color: transparent;
 }
 
 .verdict--relative,
 .verdict--inconclusive {
   background: var(--accent-soft);
-  border-color: transparent;
 }
 
 .verdict__score {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  margin: 0;
 }
 
 .verdict__title {
   font-weight: 600;
   color: var(--text);
+  margin: 0;
 }
 
 .verdict p {
   color: var(--text-soft);
-}
-
-/* --- Pied de page --- */
-
-.app__footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  color: var(--text-soft);
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
+  margin: 0 0 8px;
 }
 
 @media (max-width: 680px) {

@@ -5,7 +5,7 @@
   --black-key-width: clamp(22px, 4.2vw, 34px);
   /* La hauteur suit aussi la fenêtre : les sections ne défilent pas, le
      clavier doit donc savoir se tasser. */
-  --white-key-height: clamp(96px, min(20vw, 26vh), 170px);
+  --white-key-height: clamp(96px, min(24vw, 32vh), 235px);
   width: 100%;
 }
 

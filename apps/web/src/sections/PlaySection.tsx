@@ -28,58 +28,61 @@ export function PlaySection({ scaleKey }: PlaySectionProps) {
 
   return (
     <section className="section">
-      <header className="section__header">
-        <div>
-          <h2>Jouer</h2>
-          <p className="section__lead">
-            Les touches <kbd>q</kbd> à <kbd>l</kbd> donnent les blanches, <kbd>z</kbd> à{' '}
-            <kbd>o</kbd> les noires. Les deux touches inertes tombent là où le piano n’a pas
-            de touche noire — entre mi et fa, et entre si et do.
-          </p>
-        </div>
-      </header>
-
-      <div className="toolbar">
-        <div className="toolbar__group">
-          <button
-            type="button"
-            className="button button--primary"
-            onClick={() => void notePlayer.playSequence(scale, { interval: 0.38 })}
-          >
-            Écouter {scaleKey.name}
-          </button>
-          <button
-            type="button"
-            className="button"
-            onClick={() => void notePlayer.playSequence([...scale].reverse(), { interval: 0.38 })}
-          >
-            En descendant
-          </button>
-          <button
-            type="button"
-            className="button"
-            onClick={() => void notePlayer.playSequence([...scale, ...[...scale].reverse().slice(1)], { interval: 0.3 })}
-          >
-            Aller-retour
-          </button>
-        </div>
-
+      <header className="bar">
+        <h2>Jouer</h2>
+        <span className="bar__meta">
+          {scaleKey.name} — {scale.map((note) => noteName(note)).join(' ')}
+        </span>
+        <div className="bar__spacer" />
+        <button
+          type="button"
+          className="button button--primary"
+          onClick={() => void notePlayer.playSequence(scale, { interval: 0.38 })}
+        >
+          Écouter
+        </button>
+        <button
+          type="button"
+          className="button"
+          onClick={() => void notePlayer.playSequence([...scale].reverse(), { interval: 0.38 })}
+        >
+          En descendant
+        </button>
+        <button
+          type="button"
+          className="button"
+          onClick={() =>
+            void notePlayer.playSequence([...scale, ...[...scale].reverse().slice(1)], {
+              interval: 0.3,
+            })
+          }
+        >
+          Aller-retour
+        </button>
         <label className="switch">
           <input
             type="checkbox"
             checked={showNoteNames}
             onChange={(event) => setShowNoteNames(event.target.checked)}
           />
-          Afficher le nom des notes
+          Noms des notes
         </label>
-      </div>
+      </header>
 
-      <Piano
-        preferFlats={preferFlats}
-        highlighted={scale}
-        showNoteNames={showNoteNames}
-        onNote={setLastNote}
-      />
+      <p className="hint">
+        Les touches <kbd>q</kbd> à <kbd>l</kbd> donnent les blanches, <kbd>z</kbd> à{' '}
+        <kbd>o</kbd> les noires. Les deux touches inertes tombent là où le piano n’a pas de
+        touche noire — entre mi et fa, et entre si et do.
+      </p>
+
+      <div className="stage stage--center">
+        <Piano
+          preferFlats={preferFlats}
+          highlighted={scale}
+          showNoteNames={showNoteNames}
+          onNote={setLastNote}
+        />
+      </div>
 
       <div className="readout">
         {lastNote === null ? (
@@ -103,10 +106,6 @@ export function PlaySection({ scaleKey }: PlaySectionProps) {
           </p>
         )}
       </div>
-
-      <p className="section__note">
-        Les touches surlignées forment {scaleKey.name} : {scale.map((note) => noteName(note)).join(' ')}.
-      </p>
     </section>
   )
 }

@@ -40,6 +40,8 @@ export function EarSection({ scaleKey, mode, onModeChange, verdict, onVerdict }:
   const [calibration, setCalibration] = useState<EarQuestion[] | null>(null)
   const [calibrationIndex, setCalibrationIndex] = useState(0)
   const [calibrationScore, setCalibrationScore] = useState(0)
+  /** Le verdict occupe la scène juste après le test, puis s'efface. */
+  const [verdictShown, setVerdictShown] = useState(false)
 
   const inCalibration = calibration !== null
 
@@ -69,6 +71,7 @@ export function EarSection({ scaleKey, mode, onModeChange, verdict, onVerdict }:
     setCalibration(questions)
     setCalibrationIndex(0)
     setCalibrationScore(0)
+    setVerdictShown(false)
     setPhase('asking')
     setQuestion(questions[0] ?? null)
     setAnswer(null)
@@ -96,6 +99,7 @@ export function EarSection({ scaleKey, mode, onModeChange, verdict, onVerdict }:
       setCalibration(null)
       setQuestion(null)
       setPhase('idle')
+      setVerdictShown(true)
       return
     }
 
@@ -128,181 +132,206 @@ export function EarSection({ scaleKey, mode, onModeChange, verdict, onVerdict }:
 
   return (
     <section className="section">
-      <header className="section__header">
-        <div>
-          <h2>Reconnaître à l’oreille</h2>
-          <p className="section__lead">
-            Une note est jouée, vous la retrouvez sur le clavier. En mode relatif, la
-            tonique est donnée d’abord comme point de repère.
-          </p>
-        </div>
+      <header className="bar">
+        <h2>Reconnaître à l’oreille</h2>
+        {!inCalibration ? (
+          <>
+            <div className="toolbar__group" role="group" aria-label="Mode d’écoute">
+              <button
+                type="button"
+                className={`chip${mode === 'relative' ? ' chip--active' : ''}`}
+                onClick={() => onModeChange('relative')}
+                aria-pressed={mode === 'relative'}
+                title="La tonique est jouée d’abord, comme point de repère"
+              >
+                Relatif
+              </button>
+              <button
+                type="button"
+                className={`chip${mode === 'absolute' ? ' chip--active' : ''}`}
+                onClick={() => onModeChange('absolute')}
+                aria-pressed={mode === 'absolute'}
+                title="Aucune référence : ce mode suppose l’oreille absolue"
+              >
+                Absolu
+              </button>
+            </div>
+            {mode === 'relative' ? (
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={guided}
+                  onChange={(event) => setGuided(event.target.checked)}
+                />
+                Guider dans la gamme
+              </label>
+            ) : null}
+          </>
+        ) : null}
+
+        <div className="bar__spacer" />
+
+        {score.asked > 0 && !inCalibration ? (
+          <span className="bar__meta">
+            {score.correct} / {score.asked} — {Math.round((score.correct / score.asked) * 100)} %
+          </span>
+        ) : null}
+
+        {verdict !== null && !inCalibration ? (
+          <button
+            type="button"
+            className={`badge badge--${verdict.profile}`}
+            onClick={() => setVerdictShown((shown) => !shown)}
+            title="Résultat du test de calibrage"
+          >
+            {verdict.title} · {verdict.score}/{verdict.total}
+          </button>
+        ) : null}
+
+        <button
+          type="button"
+          className="button"
+          onClick={startCalibration}
+          disabled={inCalibration}
+        >
+          {verdict === null ? 'Test de calibrage' : 'Refaire le test'}
+        </button>
       </header>
 
-      {!inCalibration ? (
-        <div className="toolbar">
-          <div className="toolbar__group" role="group" aria-label="Mode d’écoute">
-            <button
-              type="button"
-              className={`chip${mode === 'relative' ? ' chip--active' : ''}`}
-              onClick={() => onModeChange('relative')}
-              aria-pressed={mode === 'relative'}
-            >
-              Relatif
-            </button>
-            <button
-              type="button"
-              className={`chip${mode === 'absolute' ? ' chip--active' : ''}`}
-              onClick={() => onModeChange('absolute')}
-              aria-pressed={mode === 'absolute'}
-            >
-              Absolu
-            </button>
-          </div>
-
-          {mode === 'relative' ? (
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={guided}
-                onChange={(event) => setGuided(event.target.checked)}
-              />
-              Montrer les notes de la gamme
-            </label>
-          ) : null}
-        </div>
-      ) : null}
-
-      <p className="mode-note">
+      <p className="hint">
         {inCalibration ? (
           <>
-            Test en cours — note {calibrationIndex + 1} sur {CALIBRATION_LENGTH}. Aucun retour
-            n’est donné avant la fin, pour ne pas fausser la mesure.
+            Dix notes sans aucune référence, dispersées sur trois octaves. Aucun retour n’est
+            donné avant la fin : corriger note par note apprendrait à répondre, et fausserait
+            la mesure.
           </>
         ) : mode === 'relative' ? (
           <>
-            Les notes sont tirées dans {scaleKey.name}, hors tonique — elle vient d’être jouée
-            comme référence.
+            La tonique de {scaleKey.name} est jouée d’abord, puis une note de la gamme — hors
+            tonique, qui vient d’être entendue. Retrouvez-la sur le clavier.
           </>
         ) : (
           <>
             Aucune référence, tirage dans les douze notes chromatiques. Ce mode suppose
-            l’oreille absolue.
+            l’oreille absolue ; le test de calibrage dit si vous la possédez.
           </>
         )}
       </p>
 
-      <div className="ear">
+      <div className="stage stage--center">
         {inCalibration ? (
-          <div className="ear__progress">
-            <div
-              className="ear__progress-bar"
-              style={{ width: `${(calibrationIndex / CALIBRATION_LENGTH) * 100}%` }}
-            />
+          <div className="ear-panel">
+            <p className="ear-panel__step">
+              Note {calibrationIndex + 1} <span>sur {CALIBRATION_LENGTH}</span>
+            </p>
+            <div className="ear__progress">
+              <div
+                className="ear__progress-bar"
+                style={{ width: `${(calibrationIndex / CALIBRATION_LENGTH) * 100}%` }}
+              />
+            </div>
+            <div className="ear-panel__actions">
+              {question !== null ? (
+                <button type="button" className="button" onClick={() => playQuestion(question)}>
+                  Réécouter
+                </button>
+              ) : null}
+              <button type="button" className="button" onClick={abortCalibration}>
+                Abandonner
+              </button>
+            </div>
           </div>
-        ) : null}
-
-        <div className="toolbar toolbar--center">
-          {phase === 'idle' && !inCalibration ? (
-            <button type="button" className="button button--primary" onClick={nextQuestion}>
-              Commencer
-            </button>
-          ) : null}
-
-          {question !== null ? (
-            <button type="button" className="button" onClick={() => playQuestion(question)}>
-              Réécouter
-            </button>
-          ) : null}
-
-          {phase === 'answered' && !inCalibration ? (
-            <button type="button" className="button button--primary" onClick={nextQuestion}>
-              Note suivante
-            </button>
-          ) : null}
-
-          {inCalibration ? (
-            <button type="button" className="button" onClick={abortCalibration}>
-              Abandonner le test
-            </button>
-          ) : null}
-        </div>
-
-        {phase === 'answered' && question !== null ? (
-          <div className={`callout ${isCorrect ? 'callout--success' : 'callout--error'}`}>
-            {isCorrect ? (
-              <p>
-                <strong>C’est bien {noteName(question.target)}</strong>
-                {targetDegree !== null ? <> — {targetDegree}<sup>e</sup> degré de {scaleKey.name}.</> : '.'}
-              </p>
-            ) : (
-              <p>
-                <strong>C’était {noteName(question.target)}</strong>
-                {answer !== null ? <> ; vous avez joué {noteName(answer)}.</> : null}
-                {targetDegree !== null ? <> Le {targetDegree}<sup>e</sup> degré de {scaleKey.name}.</> : null}
-              </p>
-            )}
-          </div>
-        ) : null}
-
-        <Piano
-          preferFlats={preferFlats}
-          highlighted={!inCalibration && mode === 'relative' && guided ? scale : undefined}
-          feedback={
-            phase === 'answered' && question !== null && answer !== null
-              ? isCorrect
-                ? [{ note: question.target, kind: 'correct' as const }]
-                : [
-                    { note: answer, kind: 'wrong' as const },
-                    { note: question.target, kind: 'correct' as const },
-                  ]
-              : null
-          }
-          onNote={handleAnswer}
-        />
-
-        {!inCalibration && score.asked > 0 ? (
-          <p className="ear__score">
-            {score.correct} sur {score.asked} — {Math.round((score.correct / score.asked) * 100)} %
-          </p>
-        ) : null}
-      </div>
-
-      <div className="calibration">
-        <h3>Test de calibrage</h3>
-        <p>
-          Dix notes sans aucune référence, dispersées sur trois octaves. Nommer des notes
-          isolées à ce rythme n’est possible qu’avec l’oreille absolue ; le hasard seul donne
-          environ une note sur douze. Le test mesure, il ne verrouille rien.
-        </p>
-
-        {verdict !== null ? (
-          <div className={`verdict verdict--${verdict.profile}`}>
+        ) : verdictShown && verdict !== null ? (
+          <div className={`ear-panel verdict verdict--${verdict.profile}`}>
             <p className="verdict__score">
               {verdict.score} / {verdict.total}
             </p>
             <div>
               <p className="verdict__title">{verdict.title}</p>
               <p>{verdict.explanation}</p>
+              <div className="ear-panel__actions">
+                <button type="button" className="button" onClick={() => setVerdictShown(false)}>
+                  Revenir à l’entraînement
+                </button>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => {
+                    onVerdict(null)
+                    setVerdictShown(false)
+                  }}
+                >
+                  Oublier le résultat
+                </button>
+              </div>
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="ear-panel">
+            {phase === 'answered' && question !== null ? (
+              <p className={`result ${isCorrect ? 'result--success' : 'result--error'}`}>
+                {isCorrect ? (
+                  <>
+                    <strong>C’est bien {noteName(question.target)}</strong>
+                    {targetDegree !== null ? (
+                      <>
+                        {' '}
+                        — {targetDegree}
+                        <sup>e</sup> degré de {scaleKey.name}.
+                      </>
+                    ) : (
+                      '.'
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <strong>C’était {noteName(question.target)}</strong>
+                    {answer !== null ? <> ; vous avez joué {noteName(answer)}.</> : null}
+                  </>
+                )}
+              </p>
+            ) : (
+              <p className="ear-panel__prompt">
+                {phase === 'asking' ? 'Quelle note vient d’être jouée ?' : 'Prêt ?'}
+              </p>
+            )}
 
-        <div className="toolbar">
-          <button
-            type="button"
-            className="button"
-            onClick={startCalibration}
-            disabled={inCalibration}
-          >
-            {verdict === null ? 'Lancer le test' : 'Refaire le test'}
-          </button>
-          {verdict !== null ? (
-            <button type="button" className="button" onClick={() => onVerdict(null)}>
-              Oublier le résultat
-            </button>
-          ) : null}
-        </div>
+            <div className="ear-panel__actions">
+              {phase === 'idle' ? (
+                <button type="button" className="button button--primary" onClick={nextQuestion}>
+                  Commencer
+                </button>
+              ) : null}
+              {question !== null ? (
+                <button type="button" className="button" onClick={() => playQuestion(question)}>
+                  Réécouter
+                </button>
+              ) : null}
+              {phase === 'answered' ? (
+                <button type="button" className="button button--primary" onClick={nextQuestion}>
+                  Note suivante
+                </button>
+              ) : null}
+            </div>
+          </div>
+        )}
       </div>
+
+      <Piano
+        preferFlats={preferFlats}
+        highlighted={!inCalibration && mode === 'relative' && guided ? scale : undefined}
+        feedback={
+          phase === 'answered' && question !== null && answer !== null
+            ? isCorrect
+              ? [{ note: question.target, kind: 'correct' as const }]
+              : [
+                  { note: answer, kind: 'wrong' as const },
+                  { note: question.target, kind: 'correct' as const },
+                ]
+            : null
+        }
+        onNote={handleAnswer}
+      />
     </section>
   )
 }

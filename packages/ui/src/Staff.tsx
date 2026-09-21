@@ -43,11 +43,11 @@ const DRAWING_UNITS = 112
 
 /**
  * Bornes de l'agrandissement. En dessous de 1,15 un demi-interligne tombe
- * sous 6 px et devient impossible à viser ; au-delà de 1,8 la portée mange
- * la fenêtre sans rien apporter.
+ * sous 6 px et devient impossible à viser ; au-delà de 2,4 les têtes de notes
+ * deviennent caricaturales sans que la visée y gagne.
  */
 const MIN_SCALE = 1.15
-const MAX_SCALE = 1.8
+const MAX_SCALE = 2.4
 
 /** En clé de sol, la ligne du haut porte un fa5. */
 const TREBLE_TOP_LINE = diatonicIndex({ letter: 'F', octave: 5 })
@@ -196,12 +196,30 @@ export function Staff({
     voice.setMode(Voice.Mode.SOFT)
     voice.addTickables(notes)
     new Formatter().joinVoices([voice]).format([voice], innerWidth - stave.getNoteStartX() - 24)
+
+    /**
+     * Le formateur répartit les notes selon leur largeur réelle : une note
+     * avec altération et ligne supplémentaire est plus large qu'une case vide.
+     * Les emplacements se déplaçaient donc à mesure qu'on écrivait, et on
+     * visait une cible qui bougeait.
+     *
+     * On impose un pas régulier après coup. C'est légitime ici : ce n'est pas
+     * une partition à graver, c'est une grille de saisie à huit cases, et une
+     * cible immobile vaut mieux qu'un espacement typographiquement parfait.
+     */
+    const firstX = stave.getNoteStartX() + 14
+    const step = (innerWidth - firstX - 18) / slots.length
+    const targets = notes.map((_, index) => firstX + step * (index + 0.5))
+    notes.forEach((note, index) => {
+      note.setXShift((targets[index] as number) - note.getAbsoluteX())
+    })
+
     voice.draw(context, stave)
 
     // La géométrie est exposée en pixels de page : l'échelle est absorbée ici,
     // pour que le calcul du clic n'ait pas à la connaître.
     setGeometry({
-      slotX: notes.map((note) => note.getAbsoluteX() * scale),
+      slotX: targets.map((x) => x * scale),
       topLineY: stave.getYForLine(0) * scale,
       spacing: stave.getSpacingBetweenLines() * scale,
       noteStartX: stave.getNoteStartX() * scale,
