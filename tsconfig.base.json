@@ -15,7 +15,6 @@
     "skipLibCheck": true,
     "composite": true,
     "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "dist"
+    "emitDeclarationOnly": true
   }
 }
