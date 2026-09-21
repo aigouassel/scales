@@ -78,6 +78,19 @@ l’édition est construite par-dessus.
 - **Emplacements vides.** Ce sont des `GhostNote` : elles occupent la place
   sans rien dessiner, ce qui garde la mise en page **stable** pendant qu’on
   écrit. Sans elles, chaque note posée déplacerait les précédentes.
+- **Alignement sur la grille.** Deux pièges de VexFlow se cumulaient ici.
+
+  `getAbsoluteX()` n’ajoute l’origine de la portée que si la note connaît déjà
+  sa portée, et `voice.draw()` ne la lui attache qu’au dernier moment
+  (`voice.setStave()` ne la propage pas à ses tickables). Mesurer avant donnait
+  donc des abscisses amputées de `getNoteStartX()`, et la note se dessinait un
+  emplacement trop à droite. La portée est maintenant attachée à chaque note
+  avant toute mesure.
+
+  Ensuite, la place réservée à gauche de la tête pour l’altération n’est pas
+  prévisible exactement depuis la géométrie pré-dessin. Plutôt que de la
+  deviner, la portée **mesure le dessin obtenu** et recale chaque tête sur le
+  centre de son emplacement, à la lecture du `getBBox()` du groupe de notehead.
 - **Échelle déduite de la place disponible.** À la taille native, un
   demi-interligne fait 5 px — une cible trop petite pour viser une hauteur à la
   souris. La portée mesure la boîte qu’on lui alloue et agrandit tout

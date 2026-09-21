@@ -199,6 +199,18 @@ export function Staff({
     const voice = new Voice({ numBeats: slots.length, beatValue: 4 })
     voice.setMode(Voice.Mode.SOFT)
     voice.addTickables(notes)
+    /**
+     * La portée est attachée à chaque note AVANT qu'on lise les abscisses.
+     *
+     * `getAbsoluteX()` n'ajoute l'origine de la portée que si la note connaît
+     * déjà celle-ci ; sinon elle ne rend que la position de tick. Or
+     * `voice.draw()` n'attache la portée aux notes qu'au dernier moment —
+     * `voice.setStave()` ne la propage pas à ses tickables. Mesurer avant
+     * donnait donc des abscisses amputées de `getNoteStartX()`, et le décalage
+     * se reportait intégralement sur le dessin : la note apparaissait dans
+     * l'emplacement voisin.
+     */
+    for (const note of notes) note.setStave(stave)
     new Formatter().joinVoices([voice]).format([voice], innerWidth - stave.getNoteStartX() - 24)
 
     /**
@@ -219,6 +231,33 @@ export function Staff({
     })
 
     voice.draw(context, stave)
+
+    /**
+     * Recalage des têtes de notes, après dessin.
+     *
+     * VexFlow réserve à gauche de la tête la place de ses modificateurs —
+     * l'altération — et sa géométrie pré-dessin ne permet pas de prévoir cette
+     * réserve avec exactitude : une note altérée se posait une dizaine de
+     * pixels à gauche de son emplacement. Plutôt que de deviner, on mesure le
+     * dessin obtenu et on le corrige.
+     *
+     * Les cases vides sont des notes fantômes, qui ne produisent aucun
+     * élément : le k-ième groupe dessiné correspond donc au k-ième
+     * emplacement rempli.
+     */
+    const drawn = host.querySelectorAll<SVGGElement>('g.vf-stavenote')
+    const filledIndexes = slots.flatMap((slot, index) => (slot === null ? [] : [index]))
+    drawn.forEach((group, rank) => {
+      const index = filledIndexes[rank]
+      const target = index === undefined ? undefined : targets[index]
+      const head = group.querySelector<SVGGElement>('g.vf-notehead')
+      if (target === undefined || head === null) return
+
+      const box = head.getBBox()
+      const shift = target - (box.x + box.width / 2)
+      if (Math.abs(shift) < 0.25) return
+      group.setAttribute('transform', `translate(${shift.toFixed(2)}, 0)`)
+    })
 
     // La géométrie est exposée en pixels de page : l'échelle est absorbée ici,
     // pour que le calcul du clic n'ait pas à la connaître.
