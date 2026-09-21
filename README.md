@@ -11,10 +11,15 @@ Ce n’est pas un assemblage de trois mini-jeux : c’est un objet unique, la
 gamme, regardé de trois façons. La progression se suit **par gamme**, pas par
 exercice.
 
+**→ [aigouassel.github.io/scales](https://aigouassel.github.io/scales/)**
+
 ```bash
 yarn install
 yarn dev
 ```
+
+Chaque poussée sur `main` relance les tests, la vérification des types, la
+construction, puis publie le résultat sur GitHub Pages.
 
 ---
 
