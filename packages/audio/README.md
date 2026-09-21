@@ -22,9 +22,10 @@ await notePlayer.playSequence(scale, { interval: 0.4 })
 
 Les échantillons se téléchargent depuis un CDN. Hors ligne, ou si la requête
 échoue, le synthétiseur prend le relais : **un exercice d’oreille sans son
-n’est pas un exercice**. `onEngineChange()` permet à l’interface d’annoncer
-lequel des deux tourne, pour que la différence de timbre ne passe pas pour un
-défaut.
+n’est pas un exercice**. `onEngineChange()` permet à une interface de savoir
+lequel des deux tourne ; l’application ne l’affiche pas — un bandeau permanent
+sur l’état de l’audio disait « en veille » la plupart du temps — mais l’API
+reste là pour signaler le repli au moment où il se produit.
 
 Le synthétiseur est additif — quatre harmoniques d’amplitude décroissante, une
 enveloppe percussive, un passe-bas qui suit la fondamentale. Il ne sonne pas

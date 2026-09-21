@@ -218,7 +218,7 @@ fait 5 px, soit une cible trop petite pour viser une hauteur à la souris.
   elle devait être servie publiquement.
 - **Les échantillons de piano viennent d’un CDN.** S’ils ne se chargent pas, un
   synthétiseur additif prend le relais : un exercice d’oreille sans son n’est
-  pas un exercice. Le pied de page indique quel moteur joue.
+  pas un exercice. Le basculement est silencieux : seul le timbre change.
 
 ---
 
