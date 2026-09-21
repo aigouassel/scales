@@ -579,37 +579,11 @@ body {
   color: var(--text-soft);
 }
 
-.ear-panel__step {
-  margin: 0;
-  font-size: 1.2rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.ear-panel__step span {
-  color: var(--text-soft);
-  font-size: 0.85rem;
-}
-
 .ear-panel__actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-}
-
-.ear__progress {
-  width: 100%;
-  max-width: 320px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--border);
-  overflow: hidden;
-}
-
-.ear__progress-bar {
-  height: 100%;
-  background: var(--accent);
-  transition: width 220ms ease;
 }
 
 .badge {
@@ -622,52 +596,71 @@ body {
   white-space: nowrap;
 }
 
-.badge--absolute {
-  background: var(--success-soft);
-  color: var(--success);
-}
-
-.badge--relative,
-.badge--inconclusive {
+.badge--neutral {
   background: var(--accent-soft);
   color: var(--text);
 }
 
-.verdict {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  text-align: left;
-  padding: 16px 18px;
+/* --- Diagnostic : la forme des erreurs --- */
+
+.diagnosis {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
 }
 
-.verdict--absolute {
-  background: var(--success-soft);
-}
-
-.verdict--relative,
-.verdict--inconclusive {
-  background: var(--accent-soft);
-}
-
-.verdict__score {
-  font-size: 1.6rem;
+.diagnosis__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 12px;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  margin: 0;
 }
 
-.verdict__title {
-  font-weight: 600;
-  color: var(--text);
-  margin: 0;
-}
-
-.verdict p {
+.diagnosis__title span {
+  font-weight: 400;
+  font-size: 0.85rem;
   color: var(--text-soft);
-  margin: 0 0 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.diagnosis__list {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.diagnosis__reading {
+  margin: 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--accent);
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* Quand le diagnostic prend la scène, elle cesse de centrer un clavier et
+   redevient une simple boîte centrée, défilable si besoin. */
+.stage--panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+/* L'avertissement du mode absolu : lisible, sans crier. */
+.hint__warning {
+  color: var(--warning);
 }
 
 @media (max-width: 680px) {

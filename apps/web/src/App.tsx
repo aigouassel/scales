@@ -3,7 +3,6 @@ import {
   PROGRESSIONS,
   PROGRESSION_LIST,
   noteName,
-  type CalibrationVerdict,
   type EarMode,
   type ProgressionId,
 } from '@scales/music-theory'
@@ -32,7 +31,6 @@ export function App() {
   const [keyId, setKeyId] = usePersistentState<string>('key', 'C')
   const [storedTab, setTab] = usePersistentState<Tab>('tab', 'exercises')
   const [earMode, setEarMode] = usePersistentState<EarMode>('earMode', 'relative')
-  const [verdict, setVerdict] = usePersistentState<CalibrationVerdict | null>('verdict', null)
   const [solved, setSolved] = usePersistentState<string[]>('solved', [])
 
   /**
@@ -134,13 +132,7 @@ export function App() {
         ) : null}
         {tab === 'play' ? <PlaySection scaleKey={scaleKey} /> : null}
         {tab === 'ear' ? (
-          <EarSection
-            scaleKey={scaleKey}
-            mode={earMode}
-            onModeChange={setEarMode}
-            verdict={verdict}
-            onVerdict={setVerdict}
-          />
+          <EarSection scaleKey={scaleKey} mode={earMode} onModeChange={setEarMode} />
         ) : null}
         {tab === 'lexicon' ? <LexiconSection scaleKey={scaleKey} /> : null}
       </main>
