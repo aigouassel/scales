@@ -34,23 +34,36 @@ export interface StaffProps {
   onSelect?: (index: number) => void
 }
 
+/**
+ * Hauteur du dessin en unités VexFlow : quatre interlignes réservés au-dessus
+ * de la portée, ses quatre interlignes, puis de quoi loger une ligne
+ * supplémentaire et une hampe en dessous.
+ */
+const DRAWING_UNITS = 112
+
+/**
+ * Bornes de l'agrandissement. En dessous de 1,15 un demi-interligne tombe
+ * sous 6 px et devient impossible à viser ; au-delà de 1,8 la portée mange
+ * la fenêtre sans rien apporter.
+ */
+const MIN_SCALE = 1.15
+const MAX_SCALE = 1.8
+
 /** En clé de sol, la ligne du haut porte un fa5. */
 const TREBLE_TOP_LINE = diatonicIndex({ letter: 'F', octave: 5 })
 
 /**
- * Agrandissement du dessin. VexFlow grave avec un interligne de 10 px, ce qui
- * laisse 5 px entre deux degrés voisins : trop peu pour viser à la souris.
- * On met tout à l'échelle — portée, clé, notes — plutôt que d'écarter les
- * seules lignes, qui donnerait des têtes de notes trop petites.
+ * VexFlow grave avec un interligne de 10 px, ce qui laisse 5 px entre deux
+ * degrés voisins : trop peu pour viser à la souris. Tout est donc mis à
+ * l'échelle — portée, clé, notes — plutôt que d'écarter les seules lignes,
+ * qui donnerait des têtes de notes trop petites.
+ *
+ * L'agrandissement se déduit de la hauteur disponible : la portée remplit la
+ * place qu'on lui donne au lieu d'imposer la sienne.
  */
-const SCALE = 1.6
-const HEIGHT = 178
-/**
- * Marge au-dessus du dessin. VexFlow réserve déjà quatre interlignes au-dessus
- * de la portée (spaceAboveStaffLn) pour les nuances et les liaisons : ils
- * s'ajoutent à cette valeur, qui reste donc minuscule.
- */
-const STAVE_TOP = 4
+function scaleFor(height: number): number {
+  return Math.min(MAX_SCALE, Math.max(MIN_SCALE, height / DRAWING_UNITS))
+}
 
 const COLORS = {
   correct: '#1a7f5a',
@@ -86,7 +99,7 @@ export function Staff({
   onSelect,
 }: StaffProps) {
   const hostRef = useRef<HTMLDivElement | null>(null)
-  const [width, setWidth] = useState(720)
+  const [box, setBox] = useState({ width: 720, height: 180 })
   const [geometry, setGeometry] = useState<Geometry | null>(null)
   const [hover, setHover] = useState<{ index: number; diatonic: number } | null>(null)
   const [scheme, setScheme] = useState(0)
@@ -99,12 +112,21 @@ export function Staff({
     return () => query.removeEventListener('change', onChange)
   }, [])
 
-  // La portée est dessinée en pixels : sa largeur doit suivre le conteneur.
+  // La portée est dessinée en pixels : elle doit suivre la boîte qu'on lui
+  // alloue, en largeur comme en hauteur.
   useEffect(() => {
     const host = hostRef.current
     if (host === null) return
+
     const observer = new ResizeObserver(([entry]) => {
-      if (entry !== undefined) setWidth(Math.max(480, Math.floor(entry.contentRect.width)))
+      if (entry === undefined) return
+      const width = Math.max(420, Math.round(entry.contentRect.width))
+      const height = Math.max(120, Math.round(entry.contentRect.height))
+      // On ne redessine que si la boîte a vraiment changé : un setState
+      // inconditionnel ici déclencherait une boucle de redimensionnement.
+      setBox((previous) =>
+        previous.width === width && previous.height === height ? previous : { width, height },
+      )
     })
     observer.observe(host)
     return () => observer.disconnect()
@@ -114,9 +136,12 @@ export function Staff({
     const host = hostRef.current
     if (host === null) return
 
+    const { width, height } = box
+    const scale = scaleFor(height)
+
     host.replaceChildren()
     const renderer = new Renderer(host, Renderer.Backends.SVG)
-    renderer.resize(width, HEIGHT)
+    renderer.resize(width, height)
     const context: RenderContext = renderer.getContext()
 
     // La couleur par défaut du contexte s'applique à tout ce qui n'a pas de
@@ -126,10 +151,13 @@ export function Staff({
     context.setFillStyle(ink)
     context.setStrokeStyle(ink)
 
-    context.scale(SCALE, SCALE)
+    context.scale(scale, scale)
 
-    const innerWidth = width / SCALE
-    const stave = new Stave(8, STAVE_TOP / SCALE, innerWidth - 16)
+    const innerWidth = width / scale
+    // Le dessin est centré verticalement dans la boîte : quand elle est plus
+    // haute que nécessaire, la portée ne reste pas collée en haut.
+    const innerTop = Math.max(0, (height / scale - DRAWING_UNITS) / 2)
+    const stave = new Stave(8, innerTop, innerWidth - 16)
     stave.addClef('treble')
     stave.setContext(context).draw()
 
@@ -173,12 +201,12 @@ export function Staff({
     // La géométrie est exposée en pixels de page : l'échelle est absorbée ici,
     // pour que le calcul du clic n'ait pas à la connaître.
     setGeometry({
-      slotX: notes.map((note) => note.getAbsoluteX() * SCALE),
-      topLineY: stave.getYForLine(0) * SCALE,
-      spacing: stave.getSpacingBetweenLines() * SCALE,
-      noteStartX: stave.getNoteStartX() * SCALE,
+      slotX: notes.map((note) => note.getAbsoluteX() * scale),
+      topLineY: stave.getYForLine(0) * scale,
+      spacing: stave.getSpacingBetweenLines() * scale,
+      noteStartX: stave.getNoteStartX() * scale,
     })
-  }, [slots, statuses, selectedIndex, width, scheme])
+  }, [slots, statuses, selectedIndex, box, scheme])
 
   /** Convertit une ordonnée en degré diatonique, borné à l'étendue autorisée. */
   const diatonicAt = useCallback(
@@ -240,7 +268,6 @@ export function Staff({
       <div
         ref={hostRef}
         className={`staff__canvas${readOnly ? ' staff__canvas--readonly' : ''}`}
-        style={{ height: HEIGHT }}
         onPointerDown={handleClick}
         onPointerMove={(event) => {
           if (readOnly) return
@@ -250,7 +277,7 @@ export function Staff({
       />
 
       {geometry !== null ? (
-        <div className="staff__overlay" style={{ height: HEIGHT }} aria-hidden="true">
+        <div className="staff__overlay" aria-hidden="true">
           {slots.map((note, index) => (
             <span
               key={index}

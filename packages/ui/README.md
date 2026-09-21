@@ -78,10 +78,16 @@ l’édition est construite par-dessus.
 - **Emplacements vides.** Ce sont des `GhostNote` : elles occupent la place
   sans rien dessiner, ce qui garde la mise en page **stable** pendant qu’on
   écrit. Sans elles, chaque note posée déplacerait les précédentes.
-- **Échelle 1,6.** À la taille native, un demi-interligne fait 5 px — une cible
-  trop petite pour viser une hauteur à la souris. Tout est agrandi
-  uniformément, plutôt que d’écarter les seules lignes, ce qui donnerait des
-  têtes de notes trop petites.
+- **Échelle déduite de la place disponible.** À la taille native, un
+  demi-interligne fait 5 px — une cible trop petite pour viser une hauteur à la
+  souris. La portée mesure la boîte qu’on lui alloue et agrandit tout
+  uniformément (entre 1,15 et 1,8), plutôt que d’écarter les seules lignes, ce
+  qui donnerait des têtes de notes trop petites. C’est le parent qui décide de
+  la hauteur ; le composant s’y adapte au lieu d’imposer la sienne.
+
+  Le `ResizeObserver` ne remonte un changement que si la boîte arrondie a
+  vraiment bougé : un `setState` inconditionnel dans un observateur qui
+  influence sa propre cible produit une boucle de redimensionnement.
 
 ### Le thème
 

@@ -3,7 +3,9 @@
 .piano {
   --white-key-width: calc(100% / var(--white-key-count, 9));
   --black-key-width: clamp(22px, 4.2vw, 34px);
-  --white-key-height: clamp(120px, 20vw, 170px);
+  /* La hauteur suit aussi la fenêtre : les sections ne défilent pas, le
+     clavier doit donc savoir se tasser. */
+  --white-key-height: clamp(96px, min(20vw, 26vh), 170px);
   width: 100%;
 }
 
@@ -128,13 +130,19 @@
 
 /* --- Portée --- */
 
+/* La portée occupe la boîte qu'on lui donne : c'est le parent qui décide de
+   sa hauteur, et le composant s'y adapte en ajustant son échelle. */
 .staff {
   position: relative;
+  display: flex;
   width: 100%;
+  min-height: 0;
 }
 
 .staff__canvas {
+  flex: 1;
   width: 100%;
+  min-height: 0;
   cursor: crosshair;
   touch-action: none;
 }
