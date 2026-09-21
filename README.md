@@ -73,10 +73,19 @@ Une note est jouée, on la retrouve sur le clavier. Deux modes, un seul moteur :
 | **Relatif** | la tonique est jouée d’abord | les 7 notes de la gamme étudiée, hors tonique |
 | **Absolu** | aucune | les 12 notes chromatiques |
 
-Un **test de calibrage** optionnel — dix notes sans référence, dispersées sur
-trois octaves — mesure laquelle des deux oreilles on possède. Il est
-informatif : il ne verrouille aucun mode.
+Le mode absolu est un **terrain d'entraînement, pas un instrument de mesure**,
+et l'interface le dit : on y entend la note qu'on joue et on lit la réponse
+après chaque essai, ce qui laisse un repère pour la question suivante.
 
+Une case **« Masquer entre les notes »** referme ce repère quand on le
+souhaite : un agrégat chromatique de deux secondes s'intercale avant chaque
+note et efface de la mémoire à la fois la note précédente **et** celle qu'on
+vient de jouer soi-même.
+
+Une **analyse des réponses** accompagne les deux modes. Elle ne compte pas les
+bonnes réponses : elle regarde la forme des erreurs et la régularité des
+latences — c'est-à-dire *comment* la réponse a été trouvée, et non *combien*
+de fois.
 ---
 
 ## Le clavier AZERTY
@@ -148,7 +157,7 @@ volontaire — l’orthographe d’une tonalité dépend du chemin parcouru.
 
 Reconnaître une note isolée, sans référence, suppose l’**oreille absolue** :
 une capacité qui se fixe dans l’enfance et que l’entraînement adulte ne produit
-quasiment jamais. Bâtir l’exercice uniquement là-dessus condamnerait la plupart
+qu’à l’état partiel et fragile. Bâtir l’exercice uniquement là-dessus condamnerait la plupart
 des utilisateurs à échouer sans progresser.
 
 L’**oreille relative** — reconnaître une note par rapport à une référence — se
@@ -159,12 +168,62 @@ fa♯ » sont la même connaissance par deux portes.
 D’où le découpage : l’utilisateur **choisit** son mode, et un test séparé
 **mesure** son oreille sans rien imposer.
 
-Le test disperse ses notes sur trois octaves et impose au moins une quarte
-entre deux notes consécutives. Sans cet écart, on pourrait répondre en
-comparant à la note précédente encore en mémoire — c’est-à-dire à l’oreille
-relative, précisément ce que le test doit exclure. Il ne donne aucun retour
-avant la fin, pour la même raison : corriger note par note apprendrait à
-répondre.
+### Un exercice d’oreille fuit de partout
+
+Croire qu’il suffit de jouer une note au hasard est une erreur. Cinq chemins
+permettent de répondre juste **sans nommer la note**, et chacun a demandé sa
+propre parade.
+
+| Fuite | Ce qu’elle permettait | Parade |
+| --- | --- | --- |
+| Octave figée | le registre ne variait jamais | tirage sur trois octaves |
+| Notes voisines | comparer de proche en proche | écart d’au moins une quarte |
+| Note précédente en tête | s’en servir comme diapason | agrégat chromatique, en option |
+| **Sa propre réponse** | on entend une note dont on connaît le nom | le même agrégat |
+| Corrigé immédiat | il nomme la note qu’on vient d’entendre | idem |
+
+Les trois dernières tiennent au même fait : après avoir répondu, on dispose
+d’un son *nommé* à deux secondes de la question suivante. Un masque de deux
+secondes les ferme toutes les trois d’un coup — c’est pour cela qu’il est une
+case à cocher unique et non trois réglages.
+
+Le masque reste optionnel parce qu’il coûte cher : il est désagréable, et il
+allonge chaque question. L’exercice doit rester praticable ; c’est à
+l’utilisateur de décider quand il veut se serrer la vis.
+
+### Un score ne dit pas comment on a répondu
+
+Le nombre de bonnes réponses ne distingue pas « nommer » de « calculer depuis
+un repère ». Trois mesures le font :
+
+- **L’effet d’ancrage.** Si l’on s’appuie sur la note précédente, la réussite
+  doit chuter quand l’intervalle grandit. Une oreille absolue est indifférente
+  à la distance. L’écart entre les deux taux teste directement l’hypothèse,
+  sans rien demander d’introspectif.
+- **L’erreur en miroir.** Répondre une note située à la même distance de la
+  précédente que la bonne, mais de l’autre côté — la confusion quarte/quinte.
+  C’est un intervalle bien dimensionné et mal orienté : un geste que seule une
+  stratégie par intervalle peut produire.
+- **La régularité des latences.** L’oreille absolue est un accès lexical :
+  rapide, et surtout *constant*. C’est la variance qui trahit le calcul, pas
+  la moyenne.
+
+Chacune de ces formes survient aussi par hasard — sur onze réponses fausses,
+deux sont à un demi-ton et une est le miroir. Seule leur **part**, comparée à
+cette base, est interprétable.
+
+### Compter juste
+
+`chanceProbability` calcule la queue d’une loi binomiale de paramètre 1/12 :
+la probabilité d’obtenir ce score, ou mieux, par pur hasard.
+
+L’intuition se trompe lourdement ici, et dans les deux sens. Avec douze
+alternatives, 3 bonnes réponses sur 10 ont une probabilité de 0,044 d’être dues
+au hasard — déjà significatif — tandis que 2 sur 2 font 100 % sans rien
+prouver du tout. Un chiffre calculé vaut mieux qu’un palier écrit à la main.
+
+Le calcul se fait en logarithmes : sur 84 essais, les coefficients binomiaux
+dépassent ce qu’un `double` représente, pas leurs logarithmes.
 
 ### Poser d’abord, altérer ensuite
 
@@ -185,7 +244,7 @@ boutons avec elle.
 ```
 packages/
   music-theory/   TypeScript pur, zéro dépendance — hauteurs, gammes,
-                  progressions, tirage des exercices d'oreille. 64 tests.
+                  progressions, tirage et diagnostic des exercices d'oreille. 86 tests.
   audio/          Web Audio : échantillons de piano, synthétiseur de repli.
   ui/             Composants partagés : le clavier, la portée cliquable.
 apps/
@@ -219,7 +278,7 @@ build intermédiaire entre les workspaces.
 | Notation | [VexFlow 5](https://github.com/0xfe/vexflow) | La référence pour graver une portée en JS |
 | Son | Web Audio + [smplr](https://github.com/danigb/smplr) | Échantillons de vrai piano ; le timbre compte pour l’oreille |
 | Tests | Vitest, sur `music-theory` uniquement | Le seul endroit où la justesse est vérifiable |
-| Persistance | `localStorage` | Progression et calibrage ; pas de serveur |
+| Persistance | `localStorage` | Progression et préférences ; pas de serveur |
 
 **VexFlow ne sait que graver.** Il n’existe pas de « portée cliquable » toute
 faite : l’édition est construite par-dessus. L’ordonnée du clic est convertie
