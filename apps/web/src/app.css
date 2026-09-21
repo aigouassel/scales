@@ -672,24 +672,106 @@ body {
   }
 }
 
-/* --- Lexique --- */
+/* ---------------------------------------------------------------------------
+   Lexique : la seule page qui défile.
 
+   C'est un texte, pas un atelier : lui imposer la hauteur de la fenêtre le
+   découperait en tranches. Le sommaire reste collé en marge, et suit la
+   lecture.
+   --------------------------------------------------------------------------- */
+
+.lexicon {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  padding-bottom: 32px;
+}
+
+.toc {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: calc(100dvh - 90px);
+  overflow-y: auto;
+  padding: 4px 8px 4px 0;
+}
+
+.toc__group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-bottom: 8px;
+}
+
+.toc__chapter {
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toc__term {
+  padding: 3px 8px 3px 16px;
+  border: none;
+  border-left: 2px solid transparent;
+  background: none;
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.toc__term:hover {
+  color: var(--text);
+}
+
+.toc__term--active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+.lexicon__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lexicon__chapter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lexicon__chapter > p {
+  margin: 0 0 6px;
+  max-width: 72ch;
+  color: var(--text-soft);
+}
+
+/* Le titre de chapitre est aussi la cible du sommaire : il lui faut une marge
+   de sécurité au-dessus, sinon il colle au bord après un saut. */
 .lexicon h3 {
+  scroll-margin-top: 12px;
   font-size: 1.1rem;
   margin-top: 10px;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--border);
 }
 
-/* La largeur se limite sur le texte, pas sur la carte : rétrécir la section
-   entière la ferait paraître plus étroite que les autres onglets. */
-.lexicon > p {
-  margin: 0;
-  max-width: 72ch;
-  color: var(--text-soft);
-}
-
 .term {
+  scroll-margin-top: 12px;
   display: grid;
   grid-template-columns: 190px 1fr;
   gap: 18px;
@@ -810,6 +892,39 @@ body {
   flex-direction: column;
   gap: 3px;
   font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 980px) {
+  /* En dessous de cette largeur le sommaire mangerait le texte : il passe
+     au-dessus et le contenu reprend toute la largeur. */
+  .lexicon {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .toc {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-height: none;
+    gap: 6px;
+  }
+
+  .toc__group {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+    padding-bottom: 0;
+  }
+
+  .toc__term {
+    display: none;
+  }
+
+  .toc__chapter {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
 }
 
 @media (max-width: 680px) {
