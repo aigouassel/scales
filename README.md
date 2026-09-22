@@ -245,6 +245,26 @@ prouver du tout. Un chiffre calculé vaut mieux qu’un palier écrit à la main
 Le calcul se fait en logarithmes : sur 84 essais, les coefficients binomiaux
 dépassent ce qu’un `double` représente, pas leurs logarithmes.
 
+### L’écriture est muette
+
+Poser une note sur la portée ne produit aucun son, et ce n’est pas un oubli.
+
+Entendre chaque note en l’écrivant change la nature de l’exercice : on cesse de
+**dériver** la gamme de ses règles pour la **chercher** à l’oreille. C’est un
+travail légitime — c’est même exactement celui de la page « Oreille », qui le
+fait mieux, avec un tirage et une correction faits pour ça.
+
+L’argument est plus fort encore pour les altérations. Le son ne distingue pas
+do♯ de ré♭ : il ne dit donc rien de la seule chose qu’on décide en appuyant sur
+les flèches. Sonner ici, ce serait donner un retour qui ne porte pas sur la
+question posée.
+
+On entend sa gamme quand on le demande — « Écouter ma gamme » — et la lecture
+qui récompense une réponse juste reste. Le premier clic sur la portée
+déverrouille tout de même l’audio en silence : les navigateurs exigent un geste
+utilisateur, et charger les échantillons de piano prend quelques secondes.
+Sans cette amorce, la récompense arriverait en retard.
+
 ### Poser d’abord, altérer ensuite
 
 Un clic pose toujours une note **naturelle** ; <kbd>↑</kbd> et <kbd>↓</kbd>

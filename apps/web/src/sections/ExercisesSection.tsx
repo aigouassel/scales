@@ -67,6 +67,21 @@ export function ExercisesSection({
    * décider avant d'écrire — et, quand elle agissait aussi sur la sélection,
    * régler le bémol de la note SUIVANTE altérait silencieusement la
    * précédente. Poser puis ajuster supprime la question de l'ordre.
+   *
+   * L'écriture est MUETTE, et c'est délibéré. Entendre chaque note en la
+   * posant transforme l'exercice : on cesse de dériver la gamme de ses règles
+   * pour la chercher à l'oreille, ce que la page « Oreille » fait déjà et
+   * mieux. Pire, le son ne peut pas trancher ce que cette page enseigne — do♯
+   * et ré♭ sortent la même touche, et c'est justement là qu'on se trompe.
+   *
+   * On entend sa gamme quand on le demande : « Écouter ma gamme », ou la
+   * lecture qui récompense une réponse juste.
+   *
+   * `unlock()` reste appelé, sans jouer quoi que ce soit. Les navigateurs
+   * exigent un geste utilisateur pour démarrer l'audio, et le chargement des
+   * échantillons de piano prend quelques secondes : profiter du premier clic
+   * pour l'amorcer évite que la récompense d'une gamme juste arrive en retard.
+   * Déverrouiller ne produit aucun son.
    */
   const place = useCallback((index: number, letter: Letter, octave: number) => {
     setStatuses(null)
@@ -77,13 +92,17 @@ export function ExercisesSection({
       next[index] = note
       return next
     })
-    void notePlayer.unlock().then(() => notePlayer.play(note, { duration: 0.8 }))
+    void notePlayer.unlock()
   }, [])
 
   /**
    * Les flèches verticales altèrent la note sélectionnée, d'un demi-ton à
    * chaque pression, entre bémol et dièse. Elles n'agissent que sur une note
    * existante : sur un emplacement vide, il n'y a rien à altérer.
+   *
+   * Muettes elles aussi — et ici l'argument est plus fort encore : le son ne
+   * distingue pas un dièse d'un bémol enharmonique. Il ne dirait donc rien de
+   * ce qu'on est en train de décider.
    */
   const adjustAlteration = useCallback(
     (delta: number) => {
@@ -104,7 +123,6 @@ export function ExercisesSection({
         copy[selected] = updated
         return copy
       })
-      void notePlayer.unlock().then(() => notePlayer.play(updated, { duration: 0.8 }))
     },
     [selected, slots],
   )
@@ -203,7 +221,8 @@ export function ExercisesSection({
       <p className="hint">
         Cliquez sur la portée pour poser une note, puis <kbd>↑</kbd> <kbd>↓</kbd> pour
         l’altérer d’un demi-ton. <kbd>←</kbd> <kbd>→</kbd> déplacent la sélection,{' '}
-        <kbd>Suppr</kbd> efface.
+        <kbd>Suppr</kbd> efface. L’écriture est muette : ici on déduit la gamme, on ne la
+        cherche pas à l’oreille.
         {hintShown ? (
           <strong className="hint__reveal">
             {scaleKey.accidentalCount === 0
