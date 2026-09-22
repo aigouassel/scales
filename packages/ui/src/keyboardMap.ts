@@ -10,6 +10,10 @@
  *
  * Les touches situées au-dessus des intervalles mi–fa et si–do restent
  * délibérément muettes : le piano n'y a pas de touche noire non plus.
+ *
+ * Les deux rangées couvrent une octave et une seconde. Maintenir Maj élève le
+ * tout d'une octave, ce qui porte l'étendue jouable à un peu plus de deux
+ * octaves sans ajouter une seule touche à mémoriser.
  */
 
 import { pitch, type Alteration, type Letter, type Pitch } from '@scales/music-theory'
@@ -110,16 +114,51 @@ export const KEY_SLOTS_BY_CODE: ReadonlyMap<string, KeySlot> = new Map(
 export const WHITE_KEY_COUNT = KEY_SLOTS.filter((slot) => slot.color === 'white').length
 
 /**
+ * Nombre d'octaves dont Maj élève le clavier.
+ *
+ * Les deux touches Maj font la même chose, et ce n'est pas une redondance : la
+ * main qui tient Maj ne joue pas. Selon qu'on travaille la main droite ou la
+ * main gauche, ce n'est pas la même qui est libre.
+ *
+ * Aucune constante ne liste `ShiftLeft` et `ShiftRight` : `KeyboardEvent`
+ * expose déjà `shiftKey`, qui vaut pour les deux et reste juste même si un
+ * keyup se perd.
+ */
+export const OCTAVE_SHIFT = 1
+
+/**
  * Note produite par une touche, dans l'orthographe demandée.
  *
  * Une touche noire n'a pas de nom absolu : la même touche est do♯ en ré
  * majeur et ré♭ en la♭ majeur. C'est la tonalité en cours qui tranche.
+ *
+ * `octaveShift` transpose la touche sans rien changer à son orthographe :
+ * une octave plus haut, do♯ reste do♯. C'est bien le même degré, joué
+ * ailleurs.
  */
-export function slotToPitch(slot: KeySlot, preferFlats: boolean): Pitch {
-  if (slot.color === 'white') return pitch(slot.letter, 0, slot.octave)
+export function slotToPitch(slot: KeySlot, preferFlats: boolean, octaveShift = 0): Pitch {
+  const octave = slot.octave + octaveShift
+  if (slot.color === 'white') return pitch(slot.letter, 0, octave)
   return preferFlats
-    ? pitch(slot.flatLetter, slot.flatAlteration, slot.octave)
-    : pitch(slot.letter, slot.sharpAlteration, slot.octave)
+    ? pitch(slot.flatLetter, slot.flatAlteration, octave)
+    : pitch(slot.letter, slot.sharpAlteration, octave)
+}
+
+const WHITE_SLOTS = KEY_SLOTS.filter((slot) => slot.color === 'white')
+
+/**
+ * Notes extrêmes du clavier, pour l'afficher. Sans cette indication, rien ne
+ * distingue à l'écran un do4 d'un do5 : une classe de hauteur porte le même
+ * nom à toutes les octaves.
+ */
+export function keyboardRange(octaveShift = 0): { lowest: Pitch; highest: Pitch } {
+  const first = WHITE_SLOTS[0]
+  const last = WHITE_SLOTS[WHITE_SLOTS.length - 1]
+  if (first === undefined || last === undefined) throw new Error('Clavier sans touche blanche')
+  return {
+    lowest: slotToPitch(first, false, octaveShift),
+    highest: slotToPitch(last, false, octaveShift),
+  }
 }
 
 /**
