@@ -242,7 +242,8 @@ export function EarSection({ scaleKey, mode, onModeChange }: EarSectionProps) {
         {mode === 'relative' ? (
           <>
             La tonique de {scaleKey.name} est jouée d’abord, puis une note de la gamme — hors
-            tonique, qui vient d’être entendue. Retrouvez-la sur le clavier.
+            tonique, qui vient d’être entendue. Retrouvez-la sur le clavier ; <kbd>Maj</kbd>
+            donne l’octave du dessus, et l’octave ne compte pas dans la correction.
           </>
         ) : masked ? (
           <>

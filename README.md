@@ -97,6 +97,26 @@ de fois.
  do4  ré4  mi4  fa4  sol4 la4  si4  do5  ré5
            └─┬─┘                └─┬─┘
        pas de touche noire   pas de touche noire
+
+  Maj (gauche ou droite, maintenue)  →  tout monte d'une octave
+```
+
+Deux rangées, do4 à ré5. **Maintenir `Maj` élève le clavier d'une octave**, ce
+qui porte l'étendue jouable à un peu plus de deux octaves sans ajouter une
+seule touche à mémoriser. Relâcher redescend.
+
+Les deux touches `Maj` font la même chose, et ce n'est pas une redondance : la
+main qui tient `Maj` ne joue pas. Selon qu'on travaille la main droite ou la
+main gauche, ce n'est pas la même qui est libre.
+
+Le décalage est **maintenu, non verrouillé**. Une bascule obligerait à se
+souvenir de l'état courant ; maintenir le rend visible dans la main, et le
+relâchement ramène toujours au même point de départ. L'étendue courante
+s'affiche au-dessus du clavier, parce qu'une classe de hauteur porte le même
+nom à toutes les octaves — rien à l'écran ne distingue autrement un do4 d'un
+do5.
+
+```
          entre mi et fa       entre si et do
               (r)                  (i)
 ```
@@ -244,7 +264,7 @@ boutons avec elle.
 ```
 packages/
   music-theory/   TypeScript pur, zéro dépendance — hauteurs, gammes,
-                  progressions, tirage et diagnostic des exercices d'oreille. 86 tests.
+                  progressions, tirage et diagnostic des exercices d'oreille. 98 tests.
   audio/          Web Audio : échantillons de piano, synthétiseur de repli.
   ui/             Composants partagés : le clavier, la portée cliquable.
 apps/

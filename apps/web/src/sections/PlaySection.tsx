@@ -72,7 +72,8 @@ export function PlaySection({ scaleKey }: PlaySectionProps) {
       <p className="hint">
         Les touches <kbd>q</kbd> à <kbd>l</kbd> donnent les blanches, <kbd>z</kbd> à{' '}
         <kbd>o</kbd> les noires. Les deux touches inertes tombent là où le piano n’a pas de
-        touche noire.
+        touche noire. Maintenez <kbd>Maj</kbd> — à gauche ou à droite, selon la main
+        libre — pour jouer une octave au-dessus ; relâchez pour redescendre.
       </p>
 
       <div className="stage stage--center">

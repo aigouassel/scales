@@ -40,6 +40,21 @@ quand le navigateur la propose (Chromium), avec l’AZERTY en repli.
 `r` et `i` sont rendues visibles mais inactives : les montrer enseigne pourquoi
 il n’y a pas de touche noire entre mi et fa, ni entre si et do.
 
+### Maj élève l’octave, sans la verrouiller
+
+`slotToPitch(slot, preferFlats, octaveShift)` transpose une touche sans
+toucher à son orthographe : une octave plus haut, do♯ reste do♯. C’est le même
+degré, joué ailleurs — transposer n’est pas réécrire.
+
+L’état ne compte pas les appuis sur `ShiftLeft` et `ShiftRight` : il se lit sur
+`event.shiftKey`, qui vaut pour les deux touches et reste juste même si un
+`keyup` se perd. Un écouteur sur `blur` complète le filet, car quitter la
+fenêtre en tenant une touche ne produit aucun `keyup` — sans lui, on revient
+sur une octave haute que plus rien ne justifie.
+
+La classe de hauteur étant préservée, le surlignage de la gamme survit au
+décalage : les mêmes touches restent marquées en haut comme en bas.
+
 ### L’orthographe des touches noires
 
 Une touche noire n’a pas de nom absolu : la même est do♯ en ré majeur et ré♭ en
