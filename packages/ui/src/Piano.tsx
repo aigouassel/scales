@@ -5,7 +5,9 @@ import {
   DEAD_KEYS,
   KEY_SLOTS,
   KEY_SLOTS_BY_CODE,
+  OCTAVE_SHIFT,
   WHITE_KEY_COUNT,
+  keyboardRange,
   readKeyboardLabels,
   slotToPitch,
   type KeySlot,
@@ -40,6 +42,14 @@ export function Piano({
 }: PianoProps) {
   const [activeCodes, setActiveCodes] = useState<ReadonlySet<string>>(new Set())
   const [labels, setLabels] = useState<Map<string, string> | null>(null)
+  /**
+   * Maj enfoncée : le clavier joue une octave au-dessus.
+   *
+   * Maintenue, et non verrouillée. Une bascule obligerait à se souvenir de
+   * l'état courant ; maintenir le rend visible dans la main, et le relâchement
+   * ramène toujours au même point de départ.
+   */
+  const [raised, setRaised] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -68,9 +78,9 @@ export function Piano({
   }, [highlighted])
 
   const trigger = useCallback(
-    (slot: KeySlot) => {
+    (slot: KeySlot, withOctave: boolean) => {
       if (disabled) return
-      const note = slotToPitch(slot, preferFlats)
+      const note = slotToPitch(slot, preferFlats, withOctave ? OCTAVE_SHIFT : 0)
       void notePlayer.unlock().then(() => notePlayer.play(note))
       onNote?.(note, slot)
     },
@@ -81,19 +91,28 @@ export function Piano({
     if (!captureKeyboard) return
 
     const press = (event: KeyboardEvent) => {
-      if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return
+      if (event.metaKey || event.ctrlKey || event.altKey) return
       const target = event.target as HTMLElement | null
       if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA') return
+
+      // On lit l'état de Maj sur l'événement plutôt que de compter les appuis
+      // sur ShiftLeft et ShiftRight. `shiftKey` est la vérité du système : il
+      // reste juste même si un keyup s'est perdu, ou si Maj était déjà tenue
+      // avant que la page prenne le focus.
+      setRaised(event.shiftKey)
+      if (event.repeat) return
 
       const slot = KEY_SLOTS_BY_CODE.get(event.code)
       if (slot === undefined) return
 
       event.preventDefault()
       setActiveCodes((previous) => new Set(previous).add(event.code))
-      trigger(slot)
+      trigger(slot, event.shiftKey)
     }
 
     const release = (event: KeyboardEvent) => {
+      // Au relâchement de Maj, `shiftKey` vaut déjà false : l'octave retombe.
+      setRaised(event.shiftKey)
       setActiveCodes((previous) => {
         if (!previous.has(event.code)) return previous
         const next = new Set(previous)
@@ -102,11 +121,23 @@ export function Piano({
       })
     }
 
+    /**
+     * Quitter la fenêtre en tenant une touche ne produit aucun keyup : sans
+     * ce filet, on revient sur une octave haute que plus rien ne justifie, et
+     * sur des touches restées allumées.
+     */
+    const reset = () => {
+      setRaised(false)
+      setActiveCodes(new Set())
+    }
+
     window.addEventListener('keydown', press)
     window.addEventListener('keyup', release)
+    window.addEventListener('blur', reset)
     return () => {
       window.removeEventListener('keydown', press)
       window.removeEventListener('keyup', release)
+      window.removeEventListener('blur', reset)
     }
   }, [captureKeyboard, trigger])
 
@@ -115,14 +146,14 @@ export function Piano({
 
   const feedbackClass = (slot: KeySlot): string => {
     if (feedback === null || feedback === undefined) return ''
-    const note = slotToPitch(slot, preferFlats)
+    const note = slotToPitch(slot, preferFlats, raised ? OCTAVE_SHIFT : 0)
     const mark = feedback.find((entry) => pitchClass(entry.note) === pitchClass(note))
     if (mark === undefined) return ''
     return mark.kind === 'correct' ? ' piano__key--correct' : ' piano__key--wrong'
   }
 
   const renderKey = (slot: KeySlot) => {
-    const note = slotToPitch(slot, preferFlats)
+    const note = slotToPitch(slot, preferFlats, raised ? OCTAVE_SHIFT : 0)
     const isHighlighted = highlightedClasses.has(pitchClass(note))
     const displayName = spellings.get(pitchClass(note)) ?? noteName(note)
 
@@ -150,12 +181,14 @@ export function Piano({
         className={classes}
         style={style}
         disabled={disabled}
-        aria-label={`${displayName}${slot.octave}`}
+        aria-label={`${displayName}${note.octave}`}
         aria-pressed={activeCodes.has(slot.code)}
         onPointerDown={(event) => {
           event.preventDefault()
           setActiveCodes((previous) => new Set(previous).add(slot.code))
-          trigger(slot)
+          // Maj vaut aussi à la souris : cliquer en la tenant joue l'octave
+          // du dessus, comme au clavier.
+          trigger(slot, event.shiftKey)
         }}
         onPointerUp={() =>
           setActiveCodes((previous) => {
@@ -179,8 +212,17 @@ export function Piano({
     )
   }
 
+  const range = keyboardRange(raised ? OCTAVE_SHIFT : 0)
+
   return (
     <div className="piano" style={{ ['--white-key-count' as string]: WHITE_KEY_COUNT }}>
+      {/* Une classe de hauteur porte le même nom à toutes les octaves : sans
+          cette étendue affichée, rien à l'écran ne distingue un do4 d'un do5. */}
+      <span className={`piano__octave${raised ? ' piano__octave--raised' : ''}`} aria-live="polite">
+        {noteName(range.lowest)}
+        {range.lowest.octave} – {noteName(range.highest)}
+        {range.highest.octave}
+      </span>
       <div className="piano__keys">
         {KEY_SLOTS.filter((slot) => slot.color === 'white').map(renderKey)}
         {KEY_SLOTS.filter((slot) => slot.color === 'black').map(renderKey)}

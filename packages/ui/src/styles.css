@@ -7,6 +7,8 @@
      clavier doit donc savoir se tasser. */
   --white-key-height: clamp(96px, min(24vw, 32vh), 235px);
   width: 100%;
+  /* Référence pour l'étendue affichée en surimpression. */
+  position: relative;
 }
 
 .piano__keys {
@@ -187,3 +189,23 @@
   background: rgb(47 111 208 / 0.28);
 }
 
+
+/* Étendue jouable, discrète, en surimpression du clavier. Elle est en
+   `position: absolute` pour ne rien pousser : les pages de travail tiennent
+   dans la fenêtre au pixel près. */
+.piano__octave {
+  position: absolute;
+  top: -20px;
+  right: 2px;
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  transition: color 120ms ease;
+  pointer-events: none;
+}
+
+.piano__octave--raised {
+  color: var(--accent);
+  font-weight: 600;
+}
